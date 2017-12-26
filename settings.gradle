@@ -1,2 +1,4 @@
 rootProject.name = 'spotify-java-sdk'
 
+include 'model', 'api'
+
