@@ -20,6 +20,8 @@ allprojects {
         compile "com.fasterxml.jackson.core:jackson-databind:${jackson_version}"
         compile "com.fasterxml.jackson.core:jackson-annotations:${jackson_version}"
         compile "com.fasterxml.jackson.core:jackson-core:${jackson_version}"
+        compile "org.jetbrains:annotations:${jetbrains_annotations_version}"
+
         testCompile "org.mockito:mockito-core:${mockito_version}"
         testCompile "org.assertj:assertj-core:${assertj_version}"
         testCompile "junit:junit:${junit_version}"
