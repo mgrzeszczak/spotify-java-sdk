@@ -1,30 +1,49 @@
 package com.github.mgrzeszczak.spotify.sdk.api;
 
-import java.lang.annotation.Annotation;
+import java.util.Objects;
 
 import org.reactivestreams.Publisher;
 
 import com.github.mgrzeszczak.spotify.sdk.model.Album;
-import com.github.mgrzeszczak.spotify.sdk.model.AuthenticationError;
-import com.github.mgrzeszczak.spotify.sdk.model.ErrorHolder;
+import com.github.mgrzeszczak.spotify.sdk.model.authorization.TokenData;
 
 import io.reactivex.Flowable;
 import io.reactivex.Single;
 import io.reactivex.functions.Function;
-import retrofit2.Retrofit;
+import lombok.Builder;
 
+@Builder
 class SpotifySDKImpl implements SpotifySDK {
 
+    private final String clientId;
+    private final String clientSecret;
     private final AlbumService albumService;
-    private final ExceptionConverter apiExceptionConverter;
-    private final ExceptionConverter authExceptionConverter;
-    private final Retrofit retrofit;
+    private final AuthorizationService authorizationService;
+    private final RxJavaExceptionConverter apiExceptionConverter;
+    private final RxJavaExceptionConverter authExceptionConverter;
 
-    SpotifySDKImpl(Retrofit retrofit) {
-        this.retrofit = retrofit;
-        this.albumService = retrofit.create(AlbumService.class);
-        this.apiExceptionConverter = new ExceptionConverter(new ApiThrowableHandler(retrofit.responseBodyConverter(ErrorHolder.class, new Annotation[0])));
-        this.authExceptionConverter = new ExceptionConverter(new AuthenticationThrowableHandler(retrofit.responseBodyConverter(AuthenticationError.class, new Annotation[0])));
+    public Single<TokenData> getToken(String authorizationCode, String redirectUri) {
+        Objects.requireNonNull(authorizationCode);
+        Objects.requireNonNull(redirectUri);
+        return authorizationService.getToken(
+                AuthorizationService.URL,
+                clientId,
+                clientSecret,
+                AuthorizationService.CODE_GRANT_TYPE,
+                authorizationCode,
+                redirectUri
+        ).onErrorResumeNext(authExceptionConverter::convertSingle);
+    }
+
+    public Single<TokenData> refreshToken(String refreshToken) {
+        Objects.requireNonNull(refreshToken);
+        return authorizationService.refreshToken(
+                AuthorizationService.URL,
+                clientId,
+                clientSecret,
+                AuthorizationService.REFRESH_TOKEN_GRANT_TYPE,
+                refreshToken
+        ).onErrorResumeNext(authExceptionConverter::convertSingle);
     }
 
     @Override
@@ -46,6 +65,5 @@ class SpotifySDKImpl implements SpotifySDK {
     public Flowable<Album> getAlbums(String authorization, String ids, String market) {
         return albumService.getAlbums(authorization, ids, market).onErrorResumeNext((Function<Throwable, Publisher<? extends Album>>) apiExceptionConverter::convertFlowable);
     }
-
 
 }

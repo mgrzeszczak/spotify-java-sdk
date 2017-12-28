@@ -1,4 +1,4 @@
-package com.github.mgrzeszczak.spotify.sdk.api.authorization;
+package com.github.mgrzeszczak.spotify.sdk.api;
 
 import java.util.Collection;
 

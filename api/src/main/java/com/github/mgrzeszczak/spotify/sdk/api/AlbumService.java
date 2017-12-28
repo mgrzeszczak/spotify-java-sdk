@@ -11,7 +11,7 @@ import retrofit2.http.Header;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
-public interface AlbumService {
+interface AlbumService {
 
     @GET("v1/albums/{id}")
     Single<Album> getAlbum(@Header("Authorization") String authorization,

@@ -8,14 +8,14 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.github.mgrzeszczak.spotify.sdk.api.exception.JsonDeserializeException;
 import com.github.mgrzeszczak.spotify.sdk.api.exception.JsonSerializeException;
 
-public class SpotifyObjectMapper extends ObjectMapper {
+class SpotifyObjectMapper extends ObjectMapper {
 
-    public SpotifyObjectMapper() {
+    SpotifyObjectMapper() {
         super();
         setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
     }
 
-    public <T> T deserialize(String json, Class<T> javaClass) {
+    <T> T deserialize(String json, Class<T> javaClass) {
         try {
             return readValue(json, javaClass);
         } catch (IOException e) {
@@ -23,7 +23,7 @@ public class SpotifyObjectMapper extends ObjectMapper {
         }
     }
 
-    public <T> String serialize(T object) {
+    <T> String serialize(T object) {
         try {
             return writeValueAsString(object);
         } catch (JsonProcessingException e) {
