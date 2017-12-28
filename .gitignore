@@ -3,3 +3,5 @@
 build/
 out/
 *.iml
+spotify-client-id
+spotify-client-secret

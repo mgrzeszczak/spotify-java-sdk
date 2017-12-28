@@ -1,4 +1,4 @@
 rootProject.name = 'spotify-java-sdk'
 
-include 'model', 'api', 'authorization'
+include 'model', 'api', 'example'
 
