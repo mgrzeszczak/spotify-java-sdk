@@ -5,12 +5,10 @@ import lombok.Data;
 
 @Data
 @Builder
-public class Image {
+public class AuthenticationError {
 
-    private Integer height;
+    private String error;
 
-    private String url;
-
-    private Integer width;
+    private String errorDescription;
 
 }
