@@ -20,6 +20,7 @@ import com.github.mgrzeszczak.spotify.sdk.model.ArtistContainer;
 import com.github.mgrzeszczak.spotify.sdk.model.ArtistSimplified;
 import com.github.mgrzeszczak.spotify.sdk.model.ArtistsCursorPage;
 import com.github.mgrzeszczak.spotify.sdk.model.CursorPage;
+import com.github.mgrzeszczak.spotify.sdk.model.PlayParameters;
 import com.github.mgrzeszczak.spotify.sdk.model.Recommendations;
 import com.github.mgrzeszczak.spotify.sdk.model.TrackAttributes;
 import com.github.mgrzeszczak.spotify.sdk.model.UserPrivate;
@@ -35,26 +36,13 @@ public class App {
     private static final Logger LOGGER = LogManager.getLogger(App.class);
     private static final int PORT = 8080;
     private static final String ADDRESS = "0.0.0.0";
+    private static final String REDIRECT_URI = "http://localhost:" + PORT + "/redirect";
 
     public static void main(String[] args) throws Exception {
         String clientId = readFile("spotify-client-id");
         String clientSecret = readFile("spotify-client-secret");
-        String redirectUri = "http://localhost:" + PORT + "/redirect";
-        String state = "userId";
 
-        String url = SpotifyAuthCodeURLRequestBuilder.create()
-                .clientId(clientId)
-                .responseType(SpotifyAuthCodeURLRequestBuilder.CODE_RESPONSE_TYPE)
-                .redirectUri(redirectUri)
-                .state(state)
-                .requestedScopes(Arrays.asList(Scope.values()))
-                .build();
-
-        if (!Desktop.isDesktopSupported() || !Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-            throw new RuntimeException("cannot open browser");
-        }
-        Desktop.getDesktop().browse(new URI(url));
-        AuthRedirect response = interceptRedirect(ADDRESS, PORT);
+        String authorizationCode = getAuthorizationCode(clientId);
 
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
         logging.setLevel(HttpLoggingInterceptor.Level.NONE);
@@ -69,8 +57,25 @@ public class App {
                 .okHttpClient(okHttpClient)
                 .build();
 
-        TokenData tokenData = spotify.getToken(response.getAuthorizationCode(), redirectUri).blockingGet();
+        TokenData tokenData = spotify.getToken(authorizationCode, REDIRECT_URI).blockingGet();
         String authorization = "Bearer " + tokenData.getAccessToken();
+
+        spotify.next(authorization, null).subscribe(r -> LOGGER.info(r.code()));
+        spotify.previous(authorization, null).subscribe(r -> LOGGER.info(r.code()));
+        spotify.previous(authorization, null).subscribe(r -> LOGGER.info(r.code()));
+        spotify.volume(authorization, 10, null).subscribe(r -> LOGGER.info(r.code()));
+        spotify.volume(authorization, 100, null).subscribe(r -> LOGGER.info(r.code()));
+
+        spotify.getCurrentlyPlaying(authorization, null).subscribe(r -> LOGGER.info(r.body()));
+        spotify.getCurrentPlayback(authorization, null).subscribe(r -> LOGGER.info(r.body()));
+
+        spotify.play(
+                authorization,
+                PlayParameters.builder()
+                        .contextUri("spotify:album:1tzrwGajPhpdX2EVkCnmHZ")
+                        .offset(PlayParameters.Offset.builder().position(4).build())
+                        .build(),
+                null).subscribe(r -> LOGGER.info(r));
 
         Album album = spotify.getAlbum(authorization, "1tzrwGajPhpdX2EVkCnmHZ", null).blockingGet();
         LOGGER.info(album);
@@ -107,6 +112,26 @@ public class App {
             spotify.unfollowArtistOrUser(authorization, "artist", Collections.singletonList(followedArtist.getId()))
                     .subscribe(() -> LOGGER.info("Unfollowed!"));
         }
+    }
+
+    private static String getAuthorizationCode(String clientId) throws Exception {
+
+        String state = "userId";
+
+        String url = SpotifyAuthCodeURLRequestBuilder.create()
+                .clientId(clientId)
+                .responseType(SpotifyAuthCodeURLRequestBuilder.CODE_RESPONSE_TYPE)
+                .redirectUri(REDIRECT_URI)
+                .state(state)
+                .requestedScopes(Arrays.asList(Scope.values()))
+                .build();
+
+        if (!Desktop.isDesktopSupported() || !Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+            throw new RuntimeException("cannot open browser");
+        }
+        Desktop.getDesktop().browse(new URI(url));
+        AuthRedirect response = interceptRedirect(ADDRESS, PORT);
+        return response.getAuthorizationCode();
     }
 
 }

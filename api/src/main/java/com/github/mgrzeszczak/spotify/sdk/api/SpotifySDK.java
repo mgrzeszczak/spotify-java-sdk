@@ -13,6 +13,7 @@ import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.github.mgrzeszczak.spotify.sdk.api.annotation.Beta;
 import com.github.mgrzeszczak.spotify.sdk.model.Album;
 import com.github.mgrzeszczak.spotify.sdk.model.AlbumContainer;
 import com.github.mgrzeszczak.spotify.sdk.model.AlbumSimplified;
@@ -22,13 +23,20 @@ import com.github.mgrzeszczak.spotify.sdk.model.ArtistsCursorPage;
 import com.github.mgrzeszczak.spotify.sdk.model.AudioFeatures;
 import com.github.mgrzeszczak.spotify.sdk.model.AudioFeaturesContainer;
 import com.github.mgrzeszczak.spotify.sdk.model.Category;
+import com.github.mgrzeszczak.spotify.sdk.model.CurrentPlayback;
+import com.github.mgrzeszczak.spotify.sdk.model.CurrentlyPlaying;
+import com.github.mgrzeszczak.spotify.sdk.model.CursorPage;
+import com.github.mgrzeszczak.spotify.sdk.model.DeviceContainer;
 import com.github.mgrzeszczak.spotify.sdk.model.ErrorHolder;
 import com.github.mgrzeszczak.spotify.sdk.model.OffsetPage;
+import com.github.mgrzeszczak.spotify.sdk.model.PlayHistory;
+import com.github.mgrzeszczak.spotify.sdk.model.PlayParameters;
 import com.github.mgrzeszczak.spotify.sdk.model.PlaylistSimplified;
 import com.github.mgrzeszczak.spotify.sdk.model.Recommendations;
 import com.github.mgrzeszczak.spotify.sdk.model.Track;
 import com.github.mgrzeszczak.spotify.sdk.model.TrackAttributes;
 import com.github.mgrzeszczak.spotify.sdk.model.TrackContainer;
+import com.github.mgrzeszczak.spotify.sdk.model.TransferPlaybackParameters;
 import com.github.mgrzeszczak.spotify.sdk.model.UserPrivate;
 import com.github.mgrzeszczak.spotify.sdk.model.UserPublic;
 import com.github.mgrzeszczak.spotify.sdk.model.authorization.AuthError;
@@ -41,6 +49,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import okhttp3.OkHttpClient;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.jackson.JacksonConverterFactory;
@@ -63,6 +72,7 @@ public final class SpotifySDK {
     private final FollowService followService;
     private final PersonalizationService personalizationService;
     private final TrackService trackService;
+    private final PlayerService playerService;
 
     private final RxJavaExceptionConverter apiExceptionConverter;
     private final RxJavaExceptionConverter authExceptionConverter;
@@ -508,7 +518,149 @@ public final class SpotifySDK {
         ).onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
-    // TODO: Player, Playlists, Library
+    @Beta
+    public Single<CursorPage<PlayHistory>> getRecentlyPlayed(@NotNull String authorization,
+                                                             @Nullable Integer limit,
+                                                             @Nullable Long after,
+                                                             @Nullable Long before) {
+        requireNonNull(authorization);
+        return playerService.getRecentlyPlayed(
+                authorization,
+                limit,
+                after,
+                before
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    @Beta
+    public Single<Response<DeviceContainer>> getUserAvailableDevices(@NotNull String authorization) {
+        requireNonNull(authorization);
+        return playerService.getUserAvailableDevices(
+                authorization
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    @Beta
+    public Single<Response<Void>> next(@NotNull String authorization,
+                                       @Nullable String deviceId) {
+        requireNonNull(authorization);
+        return playerService.next(
+                authorization,
+                deviceId
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    @Beta
+    public Single<Response<Void>> previous(@NotNull String authorization,
+                                           @Nullable String deviceId) {
+        requireNonNull(authorization);
+        return playerService.next(
+                authorization,
+                deviceId
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    @Beta
+    public Single<Response<CurrentlyPlaying>> getCurrentlyPlaying(@NotNull String authorization,
+                                                                  @Nullable String market) {
+        requireNonNull(authorization);
+        return playerService.getCurrentlyPlaying(
+                authorization,
+                market
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    @Beta
+    public Single<Response<CurrentPlayback>> getCurrentPlayback(@NotNull String authorization,
+                                                                @Nullable String market) {
+        requireNonNull(authorization);
+        return playerService.getCurrentPlayback(
+                authorization,
+                market
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    @Beta
+    public Single<Response<Void>> pause(@NotNull String authorization,
+                                        @Nullable String deviceId) {
+        requireNonNull(authorization);
+        return playerService.pause(
+                authorization,
+                deviceId
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    @Beta
+    public Single<Response<Void>> seek(@NotNull String authorization,
+                                       long positionMs,
+                                       @Nullable String deviceId) {
+        requireNonNull(authorization);
+        return playerService.seek(
+                authorization,
+                positionMs,
+                deviceId
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    @Beta
+    public Single<Response<Void>> repeat(@NotNull String authorization,
+                                         @NotNull String state,
+                                         @Nullable String deviceId) {
+        requireNonNull(authorization);
+        return playerService.repeat(
+                authorization,
+                state,
+                deviceId
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    @Beta
+    public Single<Response<Void>> volume(@NotNull String authorization,
+                                         int volumePercent,
+                                         @Nullable String deviceId) {
+        requireNonNull(authorization);
+        return playerService.volume(
+                authorization,
+                volumePercent,
+                deviceId
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    @Beta
+    public Single<Response<Void>> play(@NotNull String authorization,
+                                       @NotNull PlayParameters playParameters,
+                                       @Nullable String deviceId) {
+        requireNonNull(authorization, playParameters);
+        return playerService.play(
+                authorization,
+                deviceId,
+                playParameters
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    @Beta
+    public Single<Response<Void>> shuffle(@NotNull String authorization,
+                                          boolean state,
+                                          @Nullable String deviceId) {
+        requireNonNull(authorization);
+        return playerService.shuffle(
+                authorization,
+                state,
+                deviceId
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    @Beta
+    public Single<Response<Void>> transferPlayback(@NotNull String authorization,
+                                                   @NotNull TransferPlaybackParameters transferPlaybackParameters) {
+        requireNonNull(authorization, transferPlaybackParameters);
+        return playerService.transferPlayback(
+                authorization,
+                transferPlaybackParameters
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    // TODO: Playlists, Library
 
     public static SpotifySDKBuilderSteps.ClientIdStep builder() {
         return new Builder();
@@ -578,6 +730,7 @@ public final class SpotifySDK {
                     retrofit.create(FollowService.class),
                     retrofit.create(PersonalizationService.class),
                     retrofit.create(TrackService.class),
+                    retrofit.create(PlayerService.class),
                     new RxJavaExceptionConverter(
                             new ApiErrorConverter(
                                     retrofit.responseBodyConverter(
