@@ -7,8 +7,8 @@ import lombok.Data;
 
 @Data
 @Builder
-public class Artists {
+public class AlbumContainer {
 
-    private List<Artist> artists;
+    private List<Album> albums;
 
 }

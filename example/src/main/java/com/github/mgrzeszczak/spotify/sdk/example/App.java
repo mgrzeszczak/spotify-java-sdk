@@ -16,6 +16,7 @@ import com.github.mgrzeszczak.spotify.sdk.api.SpotifyAuthCodeURLRequestBuilder;
 import com.github.mgrzeszczak.spotify.sdk.api.SpotifySDK;
 import com.github.mgrzeszczak.spotify.sdk.model.Album;
 import com.github.mgrzeszczak.spotify.sdk.model.Artist;
+import com.github.mgrzeszczak.spotify.sdk.model.ArtistContainer;
 import com.github.mgrzeszczak.spotify.sdk.model.ArtistSimplified;
 import com.github.mgrzeszczak.spotify.sdk.model.ArtistsCursorPage;
 import com.github.mgrzeszczak.spotify.sdk.model.CursorPage;
@@ -62,7 +63,7 @@ public class App {
                 .addInterceptor(logging)
                 .build();
 
-        SpotifySDK spotify = SpotifySDK.Builder.create()
+        SpotifySDK spotify = SpotifySDK.builder()
                 .clientId(clientId)
                 .clientSecret(clientSecret)
                 .okHttpClient(okHttpClient)
@@ -81,7 +82,7 @@ public class App {
         LOGGER.info(artist);
 
         spotify.getRelatedArtists(authorization, artist.getId())
-                .subscribe(LOGGER::info);
+                .subscribe((Consumer<ArtistContainer>) LOGGER::info);
 
         Recommendations recommendations = spotify.getRecommendations(
                 authorization,

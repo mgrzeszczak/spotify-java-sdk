@@ -7,8 +7,8 @@ import lombok.Data;
 
 @Data
 @Builder
-public class Tracks {
+public class AudioFeaturesContainer {
 
-    private List<Track> tracks;
+    private List<AudioFeatures> audioFeatures;
 
 }

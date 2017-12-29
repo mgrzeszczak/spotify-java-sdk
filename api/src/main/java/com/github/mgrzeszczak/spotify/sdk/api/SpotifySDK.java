@@ -7,17 +7,20 @@ import static com.github.mgrzeszczak.spotify.sdk.api.Utils.toSnakeCaseMap;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.mgrzeszczak.spotify.sdk.model.Album;
+import com.github.mgrzeszczak.spotify.sdk.model.AlbumContainer;
 import com.github.mgrzeszczak.spotify.sdk.model.AlbumSimplified;
-import com.github.mgrzeszczak.spotify.sdk.model.Albums;
 import com.github.mgrzeszczak.spotify.sdk.model.Artist;
-import com.github.mgrzeszczak.spotify.sdk.model.Artists;
+import com.github.mgrzeszczak.spotify.sdk.model.ArtistContainer;
 import com.github.mgrzeszczak.spotify.sdk.model.ArtistsCursorPage;
+import com.github.mgrzeszczak.spotify.sdk.model.AudioFeatures;
+import com.github.mgrzeszczak.spotify.sdk.model.AudioFeaturesContainer;
 import com.github.mgrzeszczak.spotify.sdk.model.Category;
 import com.github.mgrzeszczak.spotify.sdk.model.ErrorHolder;
 import com.github.mgrzeszczak.spotify.sdk.model.OffsetPage;
@@ -25,22 +28,25 @@ import com.github.mgrzeszczak.spotify.sdk.model.PlaylistSimplified;
 import com.github.mgrzeszczak.spotify.sdk.model.Recommendations;
 import com.github.mgrzeszczak.spotify.sdk.model.Track;
 import com.github.mgrzeszczak.spotify.sdk.model.TrackAttributes;
-import com.github.mgrzeszczak.spotify.sdk.model.Tracks;
+import com.github.mgrzeszczak.spotify.sdk.model.TrackContainer;
 import com.github.mgrzeszczak.spotify.sdk.model.UserPrivate;
 import com.github.mgrzeszczak.spotify.sdk.model.UserPublic;
 import com.github.mgrzeszczak.spotify.sdk.model.authorization.AuthError;
 import com.github.mgrzeszczak.spotify.sdk.model.authorization.TokenData;
 
 import io.reactivex.Completable;
-import io.reactivex.Flowable;
 import io.reactivex.Scheduler;
 import io.reactivex.Single;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
 @SuppressWarnings("unused")
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public final class SpotifySDK {
 
     private static final SpotifyObjectMapper MAPPER = new SpotifyObjectMapper();
@@ -56,49 +62,10 @@ public final class SpotifySDK {
     private final SearchService searchService;
     private final FollowService followService;
     private final PersonalizationService personalizationService;
+    private final TrackService trackService;
 
     private final RxJavaExceptionConverter apiExceptionConverter;
     private final RxJavaExceptionConverter authExceptionConverter;
-
-    private SpotifySDK(@NotNull String clientId,
-                       @NotNull String clientSecret,
-                       @NotNull AlbumService albumService,
-                       @NotNull AuthorizationService authorizationService,
-                       @NotNull ArtistService artistService,
-                       @NotNull BrowseService browseService,
-                       @NotNull UserService userService,
-                       @NotNull SearchService searchService,
-                       @NotNull FollowService followService,
-                       @NotNull PersonalizationService personalizationService,
-                       @NotNull RxJavaExceptionConverter apiExceptionConverter,
-                       @NotNull RxJavaExceptionConverter authExceptionConverter) {
-        this.personalizationService = personalizationService;
-        requireNonNull(
-                clientId,
-                clientSecret,
-                albumService,
-                authorizationService,
-                artistService,
-                browseService,
-                userService,
-                searchService,
-                followService,
-                personalizationService,
-                apiExceptionConverter,
-                authExceptionConverter
-        );
-        this.artistService = artistService;
-        this.browseService = browseService;
-        this.userService = userService;
-        this.searchService = searchService;
-        this.followService = followService;
-        this.clientId = clientId;
-        this.clientSecret = clientSecret;
-        this.albumService = albumService;
-        this.authorizationService = authorizationService;
-        this.apiExceptionConverter = apiExceptionConverter;
-        this.authExceptionConverter = authExceptionConverter;
-    }
 
     public Single<TokenData> getToken(@NotNull String authorizationCode, @NotNull String redirectUri) {
         requireNonNull(authorizationCode, redirectUri);
@@ -134,13 +101,12 @@ public final class SpotifySDK {
         ).onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
-    public Flowable<Album> getAlbums(@NotNull String authorization,
-                                     @NotNull Collection<String> albumIds,
-                                     @Nullable String market) {
+    public Single<AlbumContainer> getAlbums(@NotNull String authorization,
+                                            @NotNull Collection<String> albumIds,
+                                            @Nullable String market) {
         requireNonNull(authorization, albumIds);
         return albumService.getAlbums(authorization, commaJoin(albumIds), market)
-                .onErrorResumeNext(apiExceptionConverter::convertSingle)
-                .flattenAsFlowable(Albums::getAlbums);
+                .onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
     public Single<OffsetPage<Track>> getAlbumTracks(@NotNull String authorization,
@@ -167,31 +133,28 @@ public final class SpotifySDK {
         ).onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
-    public Flowable<Artist> getArtists(@NotNull String authorization,
-                                       @NotNull Collection<String> artistIds) {
+    public Single<ArtistContainer> getArtists(@NotNull String authorization,
+                                              @NotNull Collection<String> artistIds) {
         requireNonNull(authorization, artistIds);
         return artistService.getArtists(
                 authorization,
                 commaJoin(artistIds)
-        ).onErrorResumeNext(apiExceptionConverter::convertSingle)
-                .flattenAsFlowable(Artists::getArtists);
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
-    public Flowable<Artist> getRelatedArtists(@NotNull String authorization,
-                                              @NotNull String artistId) {
+    public Single<ArtistContainer> getRelatedArtists(@NotNull String authorization,
+                                                     @NotNull String artistId) {
         requireNonNull(authorization, artistId);
         return artistService.getRelatedArtists(authorization, artistId)
-                .onErrorResumeNext(apiExceptionConverter::convertSingle)
-                .flattenAsFlowable(Artists::getArtists);
+                .onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
-    public Flowable<Track> getArtistTopTracks(@NotNull String authorization,
-                                              @NotNull String artistId,
-                                              @NotNull String country) {
+    public Single<TrackContainer> getArtistTopTracks(@NotNull String authorization,
+                                                     @NotNull String artistId,
+                                                     @NotNull String country) {
         requireNonNull(authorization, artistId, country);
         return artistService.getArtistTopTracks(authorization, artistId, country)
-                .onErrorResumeNext(apiExceptionConverter::convertSingle)
-                .flattenAsFlowable(Tracks::getTracks);
+                .onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
     public Single<OffsetPage<Album>> getArtistAlbums(@NotNull String authorization,
@@ -495,21 +458,67 @@ public final class SpotifySDK {
         ).onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
-    // TODO: Player, Playlists, Tracks, Library
 
+    public Single<Track> getTrack(@NotNull String authorization,
+                                  @NotNull String trackId,
+                                  @Nullable String market) {
+        requireNonNull(authorization, trackId);
+        return trackService.getTrack(
+                authorization,
+                trackId,
+                market
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
 
-    public static class Builder implements
+    public Single<TrackContainer> getTracks(@NotNull String authorization,
+                                            @NotNull Collection<String> trackIds,
+                                            @Nullable String market) {
+        requireNonNull(authorization, trackIds);
+        return trackService.getTracks(
+                authorization,
+                commaJoin(trackIds),
+                market
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    public Single<AudioFeatures> getTrackAudioFeatures(@NotNull String authorization,
+                                                       @NotNull String trackId) {
+        requireNonNull(authorization, trackId);
+        return trackService.getTrackAudioFeatures(
+                authorization,
+                trackId
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    public Single<AudioFeaturesContainer> getTracksAudioFeatures(@NotNull String authorization,
+                                                                 @NotNull Collection<String> trackIds) {
+        requireNonNull(authorization, trackIds);
+        return trackService.getTracksAudioFeatures(
+                authorization,
+                commaJoin(trackIds)
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    public Single<Map<String, Object>> getTrackAudioAnalysis(@NotNull String authorization,
+                                                             @NotNull String trackId) {
+        requireNonNull(authorization, trackId);
+        return trackService.getTrackAudioAnalysis(
+                authorization,
+                trackId
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    // TODO: Player, Playlists, Library
+
+    public static SpotifySDKBuilderSteps.ClientIdStep builder() {
+        return new Builder();
+    }
+
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    private static class Builder implements
             SpotifySDKBuilderSteps.ClientIdStep,
             SpotifySDKBuilderSteps.ClientSecretStep,
             SpotifySDKBuilderSteps.OptionalStep {
-
-        private Builder() {
-
-        }
-
-        public static SpotifySDKBuilderSteps.ClientIdStep create() {
-            return new Builder();
-        }
 
         private static final String API_BASE_URL = "https://api.spotify.com/";
 
@@ -560,22 +569,41 @@ public final class SpotifySDK {
             return new SpotifySDK(
                     clientId,
                     clientSecret,
-                    retrofit.create(AlbumService.class),
                     retrofit.create(AuthorizationService.class),
+                    retrofit.create(AlbumService.class),
                     retrofit.create(ArtistService.class),
                     retrofit.create(BrowseService.class),
                     retrofit.create(UserService.class),
                     retrofit.create(SearchService.class),
                     retrofit.create(FollowService.class),
                     retrofit.create(PersonalizationService.class),
-                    new RxJavaExceptionConverter(new ApiErrorConverter(retrofit.responseBodyConverter(ErrorHolder.class, new Annotation[0]))),
-                    new RxJavaExceptionConverter(new AuthErrorConverter(retrofit.responseBodyConverter(AuthError.class, new Annotation[0])))
+                    retrofit.create(TrackService.class),
+                    new RxJavaExceptionConverter(
+                            new ApiErrorConverter(
+                                    retrofit.responseBodyConverter(
+                                            ErrorHolder.class,
+                                            new Annotation[0]
+                                    )
+                            )
+                    ),
+                    new RxJavaExceptionConverter(
+                            new AuthErrorConverter(
+                                    retrofit.responseBodyConverter(
+                                            AuthError.class,
+                                            new Annotation[0]
+                                    )
+                            )
+                    )
             );
         }
 
         private Retrofit buildRetrofit() {
             return new Retrofit.Builder()
-                    .addCallAdapterFactory(scheduler != null ? RxJava2CallAdapterFactory.createWithScheduler(scheduler) : async ? RxJava2CallAdapterFactory.createAsync() : RxJava2CallAdapterFactory.create())
+                    .addCallAdapterFactory(scheduler != null
+                            ? RxJava2CallAdapterFactory.createWithScheduler(scheduler)
+                            : async
+                            ? RxJava2CallAdapterFactory.createAsync()
+                            : RxJava2CallAdapterFactory.create())
                     .addConverterFactory(JacksonConverterFactory.create(new SpotifyObjectMapper()))
                     .baseUrl(API_BASE_URL)
                     .client(okHttpClient != null ? okHttpClient : new OkHttpClient())

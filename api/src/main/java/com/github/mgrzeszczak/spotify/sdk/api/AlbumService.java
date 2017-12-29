@@ -1,7 +1,7 @@
 package com.github.mgrzeszczak.spotify.sdk.api;
 
 import com.github.mgrzeszczak.spotify.sdk.model.Album;
-import com.github.mgrzeszczak.spotify.sdk.model.Albums;
+import com.github.mgrzeszczak.spotify.sdk.model.AlbumContainer;
 import com.github.mgrzeszczak.spotify.sdk.model.OffsetPage;
 import com.github.mgrzeszczak.spotify.sdk.model.Track;
 
@@ -19,9 +19,9 @@ interface AlbumService {
                            @Query("market") String market);
 
     @GET("v1/albums")
-    Single<Albums> getAlbums(@Header("Authorization") String authorization,
-                             @Query("ids") String ids,
-                             @Query("market") String market);
+    Single<AlbumContainer> getAlbums(@Header("Authorization") String authorization,
+                                     @Query("ids") String ids,
+                                     @Query("market") String market);
 
     @GET("albums/{id}/tracks")
     Single<OffsetPage<Track>> getAlbumTracks(@Header("Authorization") String authorization,
