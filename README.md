@@ -9,7 +9,49 @@ __IN DEVELOPMENT, BREAKING CHANGES WILL BE HAPPENING__
 
 # Installation
 
-TODO
+### Gradle
+1. Add jitpack repository
+    ```
+    allprojects {
+        repositories {
+            maven { url 'https://jitpack.io' }
+        }
+    }
+    ```
+2. Add dependencies on `api` and `model` projects
+    ```
+    dependencies {
+        compile 'com.github.mgrzeszczak:spotify-java-sdk:api:${VERSION}'
+        compile 'com.github.mgrzeszczak:spotify-java-sdk:model:${VERSION}'
+    }
+    ```
+
+### Maven
+1. Add jitpack repository
+    ```
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+    ```
+2. Add dependencies on `api` and `model` projects
+    ```
+    <dependency>
+        <groupId>com.github.mgrzeszczak.spotify-java-sdk</groupId>
+        <artifactId>api</artifactId>
+        <version>${VERSION}</version>
+    </dependency>
+    <dependency>
+        <groupId>com.github.mgrzeszczak.spotify-java-sdk</groupId>
+        <artifactId>model</artifactId>
+        <version>${VERSION}</version>
+    </dependency>
+    ```
+
+Version can be checked [__here__](https://jitpack.io/#mgrzeszczak/spotify-java-sdk).
+
 
 # Examples
 
