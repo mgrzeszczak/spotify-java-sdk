@@ -17,7 +17,7 @@ allprojects {
         compile "com.squareup.retrofit2:retrofit:${retrofit_version}"
         compile "com.squareup.retrofit2:converter-jackson:${retrofit_version}"
         compile "com.squareup.retrofit2:adapter-rxjava2:${retrofit_version}"
-        compile 'com.squareup.okhttp3:logging-interceptor:3.8.0'
+        compile "com.squareup.okhttp3:logging-interceptor:${ok_http_version}"
         compile "com.fasterxml.jackson.core:jackson-databind:${jackson_version}"
         compile "com.fasterxml.jackson.core:jackson-annotations:${jackson_version}"
         compile "com.fasterxml.jackson.core:jackson-core:${jackson_version}"
