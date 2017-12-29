@@ -55,6 +55,7 @@ public final class SpotifySDK {
     private final UserService userService;
     private final SearchService searchService;
     private final FollowService followService;
+    private final PersonalizationService personalizationService;
 
     private final RxJavaExceptionConverter apiExceptionConverter;
     private final RxJavaExceptionConverter authExceptionConverter;
@@ -68,8 +69,10 @@ public final class SpotifySDK {
                        @NotNull UserService userService,
                        @NotNull SearchService searchService,
                        @NotNull FollowService followService,
+                       @NotNull PersonalizationService personalizationService,
                        @NotNull RxJavaExceptionConverter apiExceptionConverter,
                        @NotNull RxJavaExceptionConverter authExceptionConverter) {
+        this.personalizationService = personalizationService;
         requireNonNull(
                 clientId,
                 clientSecret,
@@ -80,6 +83,7 @@ public final class SpotifySDK {
                 userService,
                 searchService,
                 followService,
+                personalizationService,
                 apiExceptionConverter,
                 authExceptionConverter
         );
@@ -463,7 +467,35 @@ public final class SpotifySDK {
         ).onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
-    // TODO: Personalization, Player, Playlists, Tracks, Library
+    public Single<OffsetPage<Artist>> getCurrentUserTopArtists(@NotNull String authorization,
+                                                               @Nullable Integer limit,
+                                                               @Nullable Integer offset,
+                                                               @Nullable String timeRange) {
+        requireNonNull(authorization);
+        return personalizationService.getCurrentUserTopArtists(
+                authorization,
+                "artists",
+                limit,
+                offset,
+                timeRange
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    public Single<OffsetPage<Track>> getCurrentUserTopTracks(@NotNull String authorization,
+                                                             @Nullable Integer limit,
+                                                             @Nullable Integer offset,
+                                                             @Nullable String timeRange) {
+        requireNonNull(authorization);
+        return personalizationService.getCurrentUserTopTracks(
+                authorization,
+                "tracks",
+                limit,
+                offset,
+                timeRange
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    // TODO: Player, Playlists, Tracks, Library
 
 
     public static class Builder implements
@@ -535,6 +567,7 @@ public final class SpotifySDK {
                     retrofit.create(UserService.class),
                     retrofit.create(SearchService.class),
                     retrofit.create(FollowService.class),
+                    retrofit.create(PersonalizationService.class),
                     new RxJavaExceptionConverter(new ApiErrorConverter(retrofit.responseBodyConverter(ErrorHolder.class, new Annotation[0]))),
                     new RxJavaExceptionConverter(new AuthErrorConverter(retrofit.responseBodyConverter(AuthError.class, new Annotation[0])))
             );
