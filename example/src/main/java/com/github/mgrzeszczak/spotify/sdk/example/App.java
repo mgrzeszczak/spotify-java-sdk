@@ -13,7 +13,7 @@ import java.nio.file.Paths;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.github.mgrzeszczak.spotify.sdk.api.AuthorizationCodeRequestURLBuilder;
+import com.github.mgrzeszczak.spotify.sdk.api.SpotifyAuthCodeURLRequestBuilder;
 import com.github.mgrzeszczak.spotify.sdk.api.SpotifySDK;
 import com.github.mgrzeszczak.spotify.sdk.model.Album;
 import com.github.mgrzeszczak.spotify.sdk.model.authorization.TokenData;
@@ -29,9 +29,9 @@ public class App {
         String redirectUri = "http://localhost:" + PORT + "/redirect";
         String state = "userId";
 
-        String url = AuthorizationCodeRequestURLBuilder.create()
+        String url = SpotifyAuthCodeURLRequestBuilder.create()
                 .clientId(clientId)
-                .responseType(AuthorizationCodeRequestURLBuilder.CODE_RESPONSE_TYPE)
+                .responseType(SpotifyAuthCodeURLRequestBuilder.CODE_RESPONSE_TYPE)
                 .redirectUri(redirectUri)
                 .state(state)
                 .build();

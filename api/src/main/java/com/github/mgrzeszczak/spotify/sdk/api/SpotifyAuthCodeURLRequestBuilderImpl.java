@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 import com.github.mgrzeszczak.spotify.sdk.model.authorization.Scope;
 
-class AuthorizationCodeRequestURLBuilderImpl implements AuthorizationCodeRequestURLBuilder {
+class SpotifyAuthCodeURLRequestBuilderImpl implements SpotifyAuthCodeURLRequestBuilder {
 
     private static final String BASE_URL = "https://accounts.spotify.com/authorize";
     private String clientId;
@@ -16,25 +16,25 @@ class AuthorizationCodeRequestURLBuilderImpl implements AuthorizationCodeRequest
     private String state;
     private boolean showDialog;
 
-    AuthorizationCodeRequestURLBuilderImpl() {
+    SpotifyAuthCodeURLRequestBuilderImpl() {
     }
 
     @Override
-    public AuthorizationCodeRequestURLBuilderSteps.ResponseTypeStep clientId(String clientId) {
+    public SpotifyAuthCodeURLRequestBuilderSteps.ResponseTypeStep clientId(String clientId) {
         Objects.requireNonNull(clientId);
         this.clientId = clientId;
         return this;
     }
 
     @Override
-    public AuthorizationCodeRequestURLBuilderSteps.RedirectUriStep responseType(String responseType) {
+    public SpotifyAuthCodeURLRequestBuilderSteps.RedirectUriStep responseType(String responseType) {
         Objects.requireNonNull(responseType);
         this.responseType = responseType;
         return this;
     }
 
     @Override
-    public AuthorizationCodeRequestURLBuilderSteps.OptionalDataStep redirectUri(String redirectUri) {
+    public SpotifyAuthCodeURLRequestBuilderSteps.OptionalDataStep redirectUri(String redirectUri) {
         Objects.requireNonNull(redirectUri);
         this.redirectUri = redirectUri;
         return this;
@@ -57,13 +57,13 @@ class AuthorizationCodeRequestURLBuilderImpl implements AuthorizationCodeRequest
     }
 
     @Override
-    public AuthorizationCodeRequestURLBuilderSteps.OptionalDataStep showDialog(boolean showDialog) {
+    public SpotifyAuthCodeURLRequestBuilderSteps.OptionalDataStep showDialog(boolean showDialog) {
         this.showDialog = showDialog;
         return this;
     }
 
     @Override
-    public AuthorizationCodeRequestURLBuilderSteps.OptionalDataStep requestedScopes(Collection<Scope> scopes) {
+    public SpotifyAuthCodeURLRequestBuilderSteps.OptionalDataStep requestedScopes(Collection<Scope> scopes) {
         Objects.requireNonNull(scopes);
         if (scopes.isEmpty()) {
             throw new IllegalArgumentException("scopes must not be empty");
@@ -73,7 +73,7 @@ class AuthorizationCodeRequestURLBuilderImpl implements AuthorizationCodeRequest
     }
 
     @Override
-    public AuthorizationCodeRequestURLBuilderSteps.OptionalDataStep state(String state) {
+    public SpotifyAuthCodeURLRequestBuilderSteps.OptionalDataStep state(String state) {
         Objects.requireNonNull(state);
         this.state = state;
         return this;

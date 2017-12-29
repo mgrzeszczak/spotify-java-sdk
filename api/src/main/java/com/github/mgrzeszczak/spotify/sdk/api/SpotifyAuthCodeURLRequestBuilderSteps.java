@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import com.github.mgrzeszczak.spotify.sdk.model.authorization.Scope;
 
-public interface AuthorizationCodeRequestURLBuilderSteps {
+public interface SpotifyAuthCodeURLRequestBuilderSteps {
 
     interface ClientIdStep {
 
