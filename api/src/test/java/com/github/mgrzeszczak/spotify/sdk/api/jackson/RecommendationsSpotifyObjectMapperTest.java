@@ -2,7 +2,6 @@ package com.github.mgrzeszczak.spotify.sdk.api.jackson;
 
 import org.junit.Test;
 
-import com.github.mgrzeszczak.spotify.sdk.model.Category;
 import com.github.mgrzeszczak.spotify.sdk.model.Recommendations;
 
 public class RecommendationsSpotifyObjectMapperTest extends SpotifyObjectMapperTest {

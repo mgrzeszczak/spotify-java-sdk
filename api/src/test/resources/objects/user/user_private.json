@@ -6,9 +6,9 @@
   "external_urls": {
     "spotify": "https://open.spotify.com/user/wizzler"
   },
-  "followers" : {
-    "href" : null,
-    "total" : 3829
+  "followers": {
+    "href": null,
+    "total": 3829
   },
   "href": "https://api.spotify.com/v1/users/wizzler",
   "id": "wizzler",

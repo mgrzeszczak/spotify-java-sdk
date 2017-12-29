@@ -7,7 +7,6 @@ import com.github.mgrzeszczak.spotify.sdk.model.enums.ObjectType;
 
 import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 @Data
 @Builder

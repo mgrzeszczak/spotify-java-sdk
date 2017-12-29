@@ -1,7 +1,5 @@
 package com.github.mgrzeszczak.spotify.sdk.api.jackson;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.junit.Test;
 
 import com.github.mgrzeszczak.spotify.sdk.model.Album;
