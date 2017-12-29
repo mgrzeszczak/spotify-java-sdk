@@ -1,6 +1,7 @@
 # spotify java sdk
 
 [![works badge](https://cdn.rawgit.com/nikku/works-on-my-machine/v0.2.0/badge.svg)](https://github.com/nikku/works-on-my-machine)
+[![Build Status](https://travis-ci.org/mgrzeszczak/spotify-java-sdk.png)](https://travis-ci.org/mgrzeszczak/spotify-java-sdk)
 
 Unofficial Spotify API Java SDK.
 
