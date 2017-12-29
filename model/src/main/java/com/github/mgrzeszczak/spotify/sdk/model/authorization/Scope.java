@@ -9,7 +9,7 @@ public enum Scope {
     PLAYLIST_MODIFY_PRIVATE,
     PLAYLIST_MODIFY_PUBLIC,
     PLAYLIST_READ_COLLABORATIVE,
-    USE_TOP_READ,
+    USER_TOP_READ,
     USER_READ_RECENTLY_PLAYED,
     USER_LIBRARY_READ,
     USER_LIBRARY_MODIFY,
@@ -18,7 +18,8 @@ public enum Scope {
     USER_READ_PLAYBACK_STATE,
     USER_FOLLOW_MODIFY,
     USER_FOLLOW_READ,
-    STREAMING;
+    STREAMING,
+    UGC_IMAGE_UPLOAD;
 
     public String getValue() {
         return name().toLowerCase().replaceAll("_", "-");

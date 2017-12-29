@@ -1,7 +1,5 @@
 package com.github.mgrzeszczak.spotify.sdk.model;
 
-import java.util.List;
-
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -11,6 +9,6 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class CursorPage<T> extends Page<T> {
 
-    private List<Cursor> cursors;
+    private Cursor cursors;
 
 }

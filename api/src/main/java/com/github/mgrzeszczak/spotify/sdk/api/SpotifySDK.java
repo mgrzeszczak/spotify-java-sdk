@@ -1,14 +1,13 @@
 package com.github.mgrzeszczak.spotify.sdk.api;
 
+import static com.github.mgrzeszczak.spotify.sdk.api.Utils.commaJoin;
+import static com.github.mgrzeszczak.spotify.sdk.api.Utils.requireNonNull;
+import static com.github.mgrzeszczak.spotify.sdk.api.Utils.toSnakeCaseMap;
+
 import java.lang.annotation.Annotation;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -18,6 +17,7 @@ import com.github.mgrzeszczak.spotify.sdk.model.AlbumSimplified;
 import com.github.mgrzeszczak.spotify.sdk.model.Albums;
 import com.github.mgrzeszczak.spotify.sdk.model.Artist;
 import com.github.mgrzeszczak.spotify.sdk.model.Artists;
+import com.github.mgrzeszczak.spotify.sdk.model.ArtistsCursorPage;
 import com.github.mgrzeszczak.spotify.sdk.model.Category;
 import com.github.mgrzeszczak.spotify.sdk.model.ErrorHolder;
 import com.github.mgrzeszczak.spotify.sdk.model.OffsetPage;
@@ -31,6 +31,7 @@ import com.github.mgrzeszczak.spotify.sdk.model.UserPublic;
 import com.github.mgrzeszczak.spotify.sdk.model.authorization.AuthError;
 import com.github.mgrzeszczak.spotify.sdk.model.authorization.TokenData;
 
+import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.Scheduler;
 import io.reactivex.Single;
@@ -39,6 +40,7 @@ import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
+@SuppressWarnings("unused")
 public final class SpotifySDK {
 
     private static final SpotifyObjectMapper MAPPER = new SpotifyObjectMapper();
@@ -52,6 +54,7 @@ public final class SpotifySDK {
     private final BrowseService browseService;
     private final UserService userService;
     private final SearchService searchService;
+    private final FollowService followService;
 
     private final RxJavaExceptionConverter apiExceptionConverter;
     private final RxJavaExceptionConverter authExceptionConverter;
@@ -61,13 +64,30 @@ public final class SpotifySDK {
                        @NotNull AlbumService albumService,
                        @NotNull AuthorizationService authorizationService,
                        @NotNull ArtistService artistService,
-                       BrowseService browseService, UserService userService, SearchService searchService, @NotNull RxJavaExceptionConverter apiExceptionConverter,
+                       @NotNull BrowseService browseService,
+                       @NotNull UserService userService,
+                       @NotNull SearchService searchService,
+                       @NotNull FollowService followService,
+                       @NotNull RxJavaExceptionConverter apiExceptionConverter,
                        @NotNull RxJavaExceptionConverter authExceptionConverter) {
+        requireNonNull(
+                clientId,
+                clientSecret,
+                albumService,
+                authorizationService,
+                artistService,
+                browseService,
+                userService,
+                searchService,
+                followService,
+                apiExceptionConverter,
+                authExceptionConverter
+        );
         this.artistService = artistService;
         this.browseService = browseService;
         this.userService = userService;
         this.searchService = searchService;
-        requireNonNull(clientId, clientSecret, albumService, authorizationService, apiExceptionConverter, authExceptionConverter);
+        this.followService = followService;
         this.clientId = clientId;
         this.clientSecret = clientSecret;
         this.albumService = albumService;
@@ -349,44 +369,102 @@ public final class SpotifySDK {
 
     public Single<UserPrivate> getCurrentUserProfile(@NotNull String authorization) {
         requireNonNull(authorization);
-        return userService.getCurrentUserProfile(authorization);
+        return userService.getCurrentUserProfile(authorization)
+                .onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
     public Single<UserPublic> getUserProfile(@NotNull String authorization,
                                              @NotNull String userId) {
         requireNonNull(authorization, userId);
-        return userService.getUserProfile(authorization, userId);
+        return userService.getUserProfile(authorization, userId)
+                .onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
-    // TODO: Follow, Personalization, Player, Playlists, Tracks, Library
 
-    @SuppressWarnings("unchecked")
-    private <T> Map<String, Object> toSnakeCaseMap(T object, String keyPrefix) {
-        if (object == null) {
-            return new HashMap<>();
-        }
-        Map<String, Object> map = MAPPER.deserialize(MAPPER.serialize(object), Map.class);
-        Map<String, Object> output = new HashMap<>();
-        map.entrySet().stream().filter(e -> e.getValue() != null).forEach(e -> output.put(keyPrefix + e.getKey(), e.getValue()));
-        return output;
+    public Single<List<Boolean>> checkIfCurrentUserFollows(@NotNull String authorization,
+                                                           @NotNull String type,
+                                                           @NotNull List<String> ids) {
+        requireNonNull(authorization, type, ids);
+        return followService.checkIfCurrentUserFollows(
+                authorization,
+                type,
+                commaJoin(ids)
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
-    private <T> String commaJoin(Collection<T> objects, Function<T, String> toString) {
-        if (objects == null) {
-            return null;
-        }
-        return objects.stream()
-                .map(toString)
-                .collect(Collectors.joining(","));
+    public Single<List<Boolean>> checkIfUsersFollowPlaylist(@NotNull String authorization,
+                                                            @NotNull String ownerId,
+                                                            @NotNull String playlistId,
+                                                            @NotNull List<String> userIds) {
+        requireNonNull(authorization, ownerId, playlistId, userIds);
+        return followService.checkIfUsersFollowPlaylist(
+                authorization,
+                ownerId,
+                playlistId,
+                commaJoin(userIds)
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
-    private String commaJoin(Collection<String> values) {
-        return commaJoin(values, Function.identity());
+    public Completable followArtistOrUser(@NotNull String authorization,
+                                          @NotNull String type,
+                                          @NotNull List<String> ids) {
+        requireNonNull(authorization, type, ids);
+        return followService.followArtistOrUser(
+                authorization,
+                type,
+                commaJoin(ids)
+        ).onErrorResumeNext(apiExceptionConverter::convertCompletable);
     }
 
-    private void requireNonNull(Object... objects) {
-        Stream.of(objects).forEach(Objects::requireNonNull);
+    public Completable unfollowArtistOrUser(@NotNull String authorization,
+                                            @NotNull String type,
+                                            @NotNull List<String> ids) {
+        requireNonNull(authorization, type, ids);
+        return followService.unfollowArtistOrUser(
+                authorization,
+                type,
+                commaJoin(ids)
+        ).onErrorResumeNext(apiExceptionConverter::convertCompletable);
     }
+
+    public Completable followPlaylist(@NotNull String authorization,
+                                      @NotNull String ownerId,
+                                      @NotNull String playlistId,
+                                      boolean includeInPublicPlaylists) {
+        requireNonNull(authorization, ownerId, playlistId);
+        return followService.followPlaylist(
+                authorization,
+                ownerId,
+                playlistId,
+                includeInPublicPlaylists
+        ).onErrorResumeNext(apiExceptionConverter::convertCompletable);
+    }
+
+    public Completable unfollowPlaylist(@NotNull String authorization,
+                                        @NotNull String ownerId,
+                                        @NotNull String playlistId) {
+        requireNonNull(authorization, ownerId, playlistId);
+        return followService.unfollowPlaylist(
+                authorization,
+                ownerId,
+                playlistId
+        ).onErrorResumeNext(apiExceptionConverter::convertCompletable);
+    }
+
+    public Single<ArtistsCursorPage> getFollowedArtists(@NotNull String authorization,
+                                                        @Nullable String limit,
+                                                        @Nullable String after) {
+        requireNonNull(authorization);
+        return followService.getFollowedArtists(
+                authorization,
+                "artist",
+                limit,
+                after
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    // TODO: Personalization, Player, Playlists, Tracks, Library
+
 
     public static class Builder implements
             SpotifySDKBuilderSteps.ClientIdStep,
@@ -456,6 +534,7 @@ public final class SpotifySDK {
                     retrofit.create(BrowseService.class),
                     retrofit.create(UserService.class),
                     retrofit.create(SearchService.class),
+                    retrofit.create(FollowService.class),
                     new RxJavaExceptionConverter(new ApiErrorConverter(retrofit.responseBodyConverter(ErrorHolder.class, new Annotation[0]))),
                     new RxJavaExceptionConverter(new AuthErrorConverter(retrofit.responseBodyConverter(AuthError.class, new Annotation[0])))
             );
