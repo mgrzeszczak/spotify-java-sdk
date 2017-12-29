@@ -1,4 +1,4 @@
-package com.github.mgrzeszczak.spotify.sdk.api.jackson;
+package com.github.mgrzeszczak.spotify.sdk.api;
 
 import org.junit.Test;
 

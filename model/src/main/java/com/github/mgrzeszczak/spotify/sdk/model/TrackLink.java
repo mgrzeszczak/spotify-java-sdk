@@ -2,8 +2,6 @@ package com.github.mgrzeszczak.spotify.sdk.model;
 
 import java.util.Map;
 
-import com.github.mgrzeszczak.spotify.sdk.model.enums.ObjectType;
-
 import lombok.Builder;
 import lombok.Data;
 
@@ -17,7 +15,7 @@ public class TrackLink {
 
     private String id;
 
-    private ObjectType type;
+    private String type;
 
     private String uri;
 

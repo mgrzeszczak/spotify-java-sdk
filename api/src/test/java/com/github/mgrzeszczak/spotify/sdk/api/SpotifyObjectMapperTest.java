@@ -1,10 +1,8 @@
-package com.github.mgrzeszczak.spotify.sdk.api.jackson;
+package com.github.mgrzeszczak.spotify.sdk.api;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-
-import com.github.mgrzeszczak.spotify.sdk.api.SpotifyObjectMapper;
 
 public abstract class SpotifyObjectMapperTest {
 

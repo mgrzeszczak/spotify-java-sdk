@@ -10,13 +10,21 @@ import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.github.mgrzeszczak.spotify.sdk.api.SpotifyAuthCodeURLRequestBuilder;
 import com.github.mgrzeszczak.spotify.sdk.api.SpotifySDK;
 import com.github.mgrzeszczak.spotify.sdk.model.Album;
+import com.github.mgrzeszczak.spotify.sdk.model.Artist;
+import com.github.mgrzeszczak.spotify.sdk.model.ArtistSimplified;
+import com.github.mgrzeszczak.spotify.sdk.model.Recommendations;
+import com.github.mgrzeszczak.spotify.sdk.model.TrackAttributes;
 import com.github.mgrzeszczak.spotify.sdk.model.authorization.TokenData;
+
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 
 public class App {
 
@@ -42,14 +50,45 @@ public class App {
         Desktop.getDesktop().browse(new URI(url));
         Response response = getResponse();
 
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                .addInterceptor(logging)
+                .build();
+
         SpotifySDK spotify = SpotifySDK.Builder.create()
                 .clientId(clientId)
                 .clientSecret(clientSecret)
+                .okHttpClient(okHttpClient)
                 .build();
 
         TokenData tokenData = spotify.getToken(response.getAuthorizationCode(), redirectUri).blockingGet();
-        Album album = spotify.getAlbum("Bearer " + tokenData.getAccessToken(), "1tzrwGajPhpdX2EVkCnmHZ").blockingGet();
+        String authorization = "Bearer " + tokenData.getAccessToken();
+
+        Album album = spotify.getAlbum(authorization, "1tzrwGajPhpdX2EVkCnmHZ", null).blockingGet();
         System.out.println(album);
+
+        ArtistSimplified artistSimple = album.getArtists().get(0);
+        System.out.println(artistSimple);
+
+        Artist artist = spotify.getArtist(authorization, artistSimple.getId()).blockingGet();
+        System.out.println(artist);
+
+        spotify.getRelatedArtists(authorization, artist.getId())
+                .subscribe(System.out::println);
+
+        Recommendations recommendations = spotify.getRecommendations(
+                authorization,
+                Collections.singletonList(artist.getId()),
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                TrackAttributes.builder().danceability(1.0f).build()
+        ).blockingGet();
+        System.out.println(recommendations);
     }
 
     private static Response getResponse() throws Exception {

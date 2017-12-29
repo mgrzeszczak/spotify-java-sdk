@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.github.mgrzeszczak.spotify.sdk.model.enums.ObjectType;
 
 import lombok.Builder;
 import lombok.Data;
@@ -38,7 +37,7 @@ public class Playlist {
 
     private String snapshotId;
 
-    private ObjectType type;
+    private String type;
 
     private String uri;
 

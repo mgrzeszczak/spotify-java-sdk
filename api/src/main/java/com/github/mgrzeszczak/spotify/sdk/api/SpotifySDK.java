@@ -1,19 +1,39 @@
 package com.github.mgrzeszczak.spotify.sdk.api;
 
 import java.lang.annotation.Annotation;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import org.reactivestreams.Publisher;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.github.mgrzeszczak.spotify.sdk.model.Album;
+import com.github.mgrzeszczak.spotify.sdk.model.AlbumSimplified;
+import com.github.mgrzeszczak.spotify.sdk.model.Albums;
+import com.github.mgrzeszczak.spotify.sdk.model.Artist;
+import com.github.mgrzeszczak.spotify.sdk.model.Artists;
+import com.github.mgrzeszczak.spotify.sdk.model.Category;
 import com.github.mgrzeszczak.spotify.sdk.model.ErrorHolder;
+import com.github.mgrzeszczak.spotify.sdk.model.OffsetPage;
+import com.github.mgrzeszczak.spotify.sdk.model.PlaylistSimplified;
+import com.github.mgrzeszczak.spotify.sdk.model.Recommendations;
+import com.github.mgrzeszczak.spotify.sdk.model.Track;
+import com.github.mgrzeszczak.spotify.sdk.model.TrackAttributes;
+import com.github.mgrzeszczak.spotify.sdk.model.Tracks;
+import com.github.mgrzeszczak.spotify.sdk.model.UserPrivate;
+import com.github.mgrzeszczak.spotify.sdk.model.UserPublic;
 import com.github.mgrzeszczak.spotify.sdk.model.authorization.AuthError;
 import com.github.mgrzeszczak.spotify.sdk.model.authorization.TokenData;
 
 import io.reactivex.Flowable;
 import io.reactivex.Scheduler;
 import io.reactivex.Single;
-import io.reactivex.functions.Function;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
@@ -21,19 +41,33 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 
 public final class SpotifySDK {
 
+    private static final SpotifyObjectMapper MAPPER = new SpotifyObjectMapper();
+
     private final String clientId;
     private final String clientSecret;
-    private final AlbumService albumService;
     private final AuthorizationService authorizationService;
+
+    private final AlbumService albumService;
+    private final ArtistService artistService;
+    private final BrowseService browseService;
+    private final UserService userService;
+    private final SearchService searchService;
+
     private final RxJavaExceptionConverter apiExceptionConverter;
     private final RxJavaExceptionConverter authExceptionConverter;
 
-    private SpotifySDK(String clientId,
-                       String clientSecret,
-                       AlbumService albumService,
-                       AuthorizationService authorizationService,
-                       RxJavaExceptionConverter apiExceptionConverter,
-                       RxJavaExceptionConverter authExceptionConverter) {
+    private SpotifySDK(@NotNull String clientId,
+                       @NotNull String clientSecret,
+                       @NotNull AlbumService albumService,
+                       @NotNull AuthorizationService authorizationService,
+                       @NotNull ArtistService artistService,
+                       BrowseService browseService, UserService userService, SearchService searchService, @NotNull RxJavaExceptionConverter apiExceptionConverter,
+                       @NotNull RxJavaExceptionConverter authExceptionConverter) {
+        this.artistService = artistService;
+        this.browseService = browseService;
+        this.userService = userService;
+        this.searchService = searchService;
+        requireNonNull(clientId, clientSecret, albumService, authorizationService, apiExceptionConverter, authExceptionConverter);
         this.clientId = clientId;
         this.clientSecret = clientSecret;
         this.albumService = albumService;
@@ -42,9 +76,8 @@ public final class SpotifySDK {
         this.authExceptionConverter = authExceptionConverter;
     }
 
-    public Single<TokenData> getToken(String authorizationCode, String redirectUri) {
-        Objects.requireNonNull(authorizationCode);
-        Objects.requireNonNull(redirectUri);
+    public Single<TokenData> getToken(@NotNull String authorizationCode, @NotNull String redirectUri) {
+        requireNonNull(authorizationCode, redirectUri);
         return authorizationService.getToken(
                 AuthorizationService.URL,
                 clientId,
@@ -55,8 +88,8 @@ public final class SpotifySDK {
         ).onErrorResumeNext(authExceptionConverter::convertSingle);
     }
 
-    public Single<TokenData> refreshToken(String refreshToken) {
-        Objects.requireNonNull(refreshToken);
+    public Single<TokenData> refreshToken(@NotNull String refreshToken) {
+        requireNonNull(refreshToken);
         return authorizationService.refreshToken(
                 AuthorizationService.URL,
                 clientId,
@@ -66,20 +99,293 @@ public final class SpotifySDK {
         ).onErrorResumeNext(authExceptionConverter::convertSingle);
     }
 
-    public Single<Album> getAlbum(String authorization, String id) {
-        return albumService.getAlbum(authorization, id).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    public Single<Album> getAlbum(@NotNull String authorization,
+                                  @NotNull String albumId,
+                                  @Nullable String market) {
+        requireNonNull(authorization, albumId);
+        return albumService.getAlbum(
+                authorization,
+                albumId,
+                market
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
-    public Single<Album> getAlbum(String authorization, String id, String market) {
-        return albumService.getAlbum(authorization, id, market).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    public Flowable<Album> getAlbums(@NotNull String authorization,
+                                     @NotNull Collection<String> albumIds,
+                                     @Nullable String market) {
+        requireNonNull(authorization, albumIds);
+        return albumService.getAlbums(authorization, commaJoin(albumIds), market)
+                .onErrorResumeNext(apiExceptionConverter::convertSingle)
+                .flattenAsFlowable(Albums::getAlbums);
     }
 
-    public Flowable<Album> getAlbums(String authorization, String ids) {
-        return albumService.getAlbums(authorization, ids).onErrorResumeNext((Function<Throwable, Publisher<? extends Album>>) apiExceptionConverter::convertFlowable);
+    public Single<OffsetPage<Track>> getAlbumTracks(@NotNull String authorization,
+                                                    @NotNull String albumId,
+                                                    @Nullable Integer limit,
+                                                    @Nullable Integer offset,
+                                                    @Nullable String market) {
+        requireNonNull(authorization, albumId);
+        return albumService.getAlbumTracks(
+                authorization,
+                albumId,
+                limit,
+                offset,
+                market
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
-    public Flowable<Album> getAlbums(String authorization, String ids, String market) {
-        return albumService.getAlbums(authorization, ids, market).onErrorResumeNext((Function<Throwable, Publisher<? extends Album>>) apiExceptionConverter::convertFlowable);
+    public Single<Artist> getArtist(@NotNull String authorization,
+                                    @NotNull String artistId) {
+        requireNonNull(authorization, artistId);
+        return artistService.getArtist(
+                authorization,
+                artistId
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    public Flowable<Artist> getArtists(@NotNull String authorization,
+                                       @NotNull Collection<String> artistIds) {
+        requireNonNull(authorization, artistIds);
+        return artistService.getArtists(
+                authorization,
+                commaJoin(artistIds)
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle)
+                .flattenAsFlowable(Artists::getArtists);
+    }
+
+    public Flowable<Artist> getRelatedArtists(@NotNull String authorization,
+                                              @NotNull String artistId) {
+        requireNonNull(authorization, artistId);
+        return artistService.getRelatedArtists(authorization, artistId)
+                .onErrorResumeNext(apiExceptionConverter::convertSingle)
+                .flattenAsFlowable(Artists::getArtists);
+    }
+
+    public Flowable<Track> getArtistTopTracks(@NotNull String authorization,
+                                              @NotNull String artistId,
+                                              @NotNull String country) {
+        requireNonNull(authorization, artistId, country);
+        return artistService.getArtistTopTracks(authorization, artistId, country)
+                .onErrorResumeNext(apiExceptionConverter::convertSingle)
+                .flattenAsFlowable(Tracks::getTracks);
+    }
+
+    public Single<OffsetPage<Album>> getArtistAlbums(@NotNull String authorization,
+                                                     @NotNull String artistId,
+                                                     @Nullable Collection<String> albumTypes,
+                                                     @Nullable String market,
+                                                     @Nullable Integer limit,
+                                                     @Nullable Integer offset) {
+        requireNonNull(authorization, artistId);
+        return artistService.getArtistAlbums(
+                authorization,
+                artistId,
+                commaJoin(albumTypes),
+                market,
+                limit,
+                offset
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    public Single<Category> getCategory(@NotNull String authorization,
+                                        @NotNull String categoryId,
+                                        @Nullable String country,
+                                        @Nullable String locale) {
+        requireNonNull(authorization, categoryId);
+        return browseService.getCategory(
+                authorization,
+                categoryId,
+                country,
+                locale
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    public Single<OffsetPage<PlaylistSimplified>> getCategoryPlaylists(@NotNull String authorization,
+                                                                       @NotNull String categoryId,
+                                                                       @Nullable String country,
+                                                                       @Nullable Integer limit,
+                                                                       @Nullable Integer offset) {
+        requireNonNull(authorization, categoryId);
+        return browseService.getCategoryPlaylists(
+                authorization,
+                categoryId,
+                country,
+                limit,
+                offset
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    public Single<OffsetPage<Category>> getCategories(@NotNull String authorization,
+                                                      @Nullable String locale,
+                                                      @Nullable String country,
+                                                      @Nullable Integer limit,
+                                                      @Nullable Integer offset) {
+        requireNonNull(authorization);
+        return browseService.getCategories(
+                authorization,
+                locale,
+                country,
+                limit,
+                offset
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    public Single<OffsetPage<PlaylistSimplified>> getFeaturedPlaylists(@NotNull String authorization,
+                                                                       @Nullable String locale,
+                                                                       @Nullable String country,
+                                                                       @Nullable String timestamp,
+                                                                       @Nullable Integer limit,
+                                                                       @Nullable Integer offset) {
+        requireNonNull(authorization);
+        return browseService.getFeaturedPlaylists(
+                authorization,
+                locale,
+                country,
+                timestamp,
+                limit,
+                offset
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    public Single<OffsetPage<AlbumSimplified>> getNewReleases(@NotNull String authorization,
+                                                              @Nullable String country,
+                                                              @Nullable Integer limit,
+                                                              @Nullable Integer offset) {
+        requireNonNull(authorization);
+        return browseService.getNewReleases(
+                authorization,
+                country,
+                limit,
+                offset
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    public Single<Recommendations> getRecommendations(@NotNull String authorization,
+                                                      @Nullable List<String> seedArtists,
+                                                      @Nullable List<String> seedGenres,
+                                                      @Nullable List<String> seedTracks,
+                                                      @Nullable String limit,
+                                                      @Nullable String market,
+                                                      @Nullable TrackAttributes minTrackAttributes,
+                                                      @Nullable TrackAttributes maxTrackAttributes,
+                                                      @Nullable TrackAttributes targetTrackAttributes) {
+        requireNonNull(authorization);
+        return browseService.getRecommendations(
+                authorization,
+                commaJoin(seedArtists),
+                commaJoin(seedGenres),
+                commaJoin(seedTracks),
+                limit,
+                market,
+                toSnakeCaseMap(minTrackAttributes, "min_"),
+                toSnakeCaseMap(maxTrackAttributes, "max_"),
+                toSnakeCaseMap(targetTrackAttributes, "target_")
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    public Single<OffsetPage<Artist>> searchArtists(@NotNull String authorization,
+                                                    @NotNull String query,
+                                                    @Nullable String market,
+                                                    @Nullable Integer limit,
+                                                    @Nullable Integer offset) {
+        requireNonNull(authorization, query);
+        return searchService.searchArtists(
+                authorization,
+                query,
+                "artist",
+                market,
+                limit,
+                offset
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    public Single<OffsetPage<AlbumSimplified>> searchAlbums(@NotNull String authorization,
+                                                            @NotNull String query,
+                                                            @Nullable String market,
+                                                            @Nullable Integer limit,
+                                                            @Nullable Integer offset) {
+        requireNonNull(authorization, query);
+        return searchService.searchAlbums(
+                authorization,
+                query,
+                "album",
+                market,
+                limit,
+                offset
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    public Single<OffsetPage<Track>> searchTracks(@NotNull String authorization,
+                                                  @NotNull String query,
+                                                  @Nullable String market,
+                                                  @Nullable Integer limit,
+                                                  @Nullable Integer offset) {
+        requireNonNull(authorization, query);
+        return searchService.searchTracks(
+                authorization,
+                query,
+                "track",
+                market,
+                limit,
+                offset
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    public Single<OffsetPage<PlaylistSimplified>> searchPlaylists(@NotNull String authorization,
+                                                                  @NotNull String query,
+                                                                  @Nullable String market,
+                                                                  @Nullable Integer limit,
+                                                                  @Nullable Integer offset) {
+        requireNonNull(authorization, query);
+        return searchService.searchPlaylists(
+                authorization,
+                query,
+                "playlist",
+                market,
+                limit,
+                offset
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    public Single<UserPrivate> getCurrentUserProfile(@NotNull String authorization) {
+        requireNonNull(authorization);
+        return userService.getCurrentUserProfile(authorization);
+    }
+
+    public Single<UserPublic> getUserProfile(@NotNull String authorization,
+                                             @NotNull String userId) {
+        requireNonNull(authorization, userId);
+        return userService.getUserProfile(authorization, userId);
+    }
+
+    // TODO: Follow, Personalization, Player, Playlists, Tracks, Library
+
+    @SuppressWarnings("unchecked")
+    private <T> Map<String, Object> toSnakeCaseMap(T object, String keyPrefix) {
+        if (object == null) {
+            return new HashMap<>();
+        }
+        Map<String, Object> map = MAPPER.deserialize(MAPPER.serialize(object), Map.class);
+        Map<String, Object> output = new HashMap<>();
+        map.entrySet().stream().filter(e -> e.getValue() != null).forEach(e -> output.put(keyPrefix + e.getKey(), e.getValue()));
+        return output;
+    }
+
+    private <T> String commaJoin(Collection<T> objects, Function<T, String> toString) {
+        if (objects == null) {
+            return null;
+        }
+        return objects.stream()
+                .map(toString)
+                .collect(Collectors.joining(","));
+    }
+
+    private String commaJoin(Collection<String> values) {
+        return commaJoin(values, Function.identity());
+    }
+
+    private void requireNonNull(Object... objects) {
+        Stream.of(objects).forEach(Objects::requireNonNull);
     }
 
     public static class Builder implements
@@ -146,6 +452,10 @@ public final class SpotifySDK {
                     clientSecret,
                     retrofit.create(AlbumService.class),
                     retrofit.create(AuthorizationService.class),
+                    retrofit.create(ArtistService.class),
+                    retrofit.create(BrowseService.class),
+                    retrofit.create(UserService.class),
+                    retrofit.create(SearchService.class),
                     new RxJavaExceptionConverter(new ApiErrorConverter(retrofit.responseBodyConverter(ErrorHolder.class, new Annotation[0]))),
                     new RxJavaExceptionConverter(new AuthErrorConverter(retrofit.responseBodyConverter(AuthError.class, new Annotation[0])))
             );

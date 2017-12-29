@@ -3,9 +3,6 @@ package com.github.mgrzeszczak.spotify.sdk.model;
 import java.util.List;
 import java.util.Map;
 
-import com.github.mgrzeszczak.spotify.sdk.model.enums.AlbumType;
-import com.github.mgrzeszczak.spotify.sdk.model.enums.ObjectType;
-
 import lombok.Builder;
 import lombok.Data;
 
@@ -13,7 +10,7 @@ import lombok.Data;
 @Builder
 public class AlbumSimplified {
 
-    private AlbumType albumType;
+    private String albumType;
 
     private List<ArtistSimplified> artists;
 
@@ -29,7 +26,7 @@ public class AlbumSimplified {
 
     private String name;
 
-    private ObjectType type;
+    private String type;
 
     private String uri;
 
