@@ -1,6 +1,10 @@
 # spotify java sdk
 
+[![works badge](https://cdn.rawgit.com/nikku/works-on-my-machine/v0.2.0/badge.svg)](https://github.com/nikku/works-on-my-machine)
+
 Unofficial Spotify API Java SDK.
+
+__IN DEVELOPMENT, BREAKING CHANGES WILL BE HAPPENING__
 
 # Installation
 
@@ -8,7 +12,7 @@ TODO
 
 # Examples
 
-TODO
+See example project.
 
 # License
 ```
