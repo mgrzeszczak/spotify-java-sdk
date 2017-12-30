@@ -40,6 +40,8 @@ import com.github.mgrzeszczak.spotify.sdk.model.PlaylistTrack;
 import com.github.mgrzeszczak.spotify.sdk.model.PlaylistTrackRemovalParameters;
 import com.github.mgrzeszczak.spotify.sdk.model.PlaylistTrackReorderParameters;
 import com.github.mgrzeszczak.spotify.sdk.model.Recommendations;
+import com.github.mgrzeszczak.spotify.sdk.model.SavedAlbum;
+import com.github.mgrzeszczak.spotify.sdk.model.SavedTrack;
 import com.github.mgrzeszczak.spotify.sdk.model.SnapshotIdContainer;
 import com.github.mgrzeszczak.spotify.sdk.model.Track;
 import com.github.mgrzeszczak.spotify.sdk.model.TrackAttributes;
@@ -83,6 +85,7 @@ public final class SpotifySDK {
     private final TrackService trackService;
     private final PlayerService playerService;
     private final PlaylistService playlistService;
+    private final LibraryService libraryService;
 
     private final RxJavaExceptionConverter apiExceptionConverter;
     private final RxJavaExceptionConverter authExceptionConverter;
@@ -870,7 +873,109 @@ public final class SpotifySDK {
         ).onErrorResumeNext(apiExceptionConverter::convertCompletable);
     }
 
-    // TODO: Library
+    @RequiredScope({
+            Scope.USER_LIBRARY_READ
+    })
+    public Single<List<Boolean>> checkSavedAlbumsContain(@NotNull String authorization,
+                                                         @NotNull Collection<String> albumIds) {
+        requireNonNull(authorization, albumIds);
+        return libraryService.checkCurrentUserSavedAlbums(
+                authorization,
+                commaJoin(albumIds)
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    @RequiredScope({
+            Scope.USER_LIBRARY_READ
+    })
+    public Single<List<Boolean>> checkSavedTracksContain(@NotNull String authorization,
+                                                         @NotNull Collection<String> trackIds) {
+        requireNonNull(authorization, trackIds);
+        return libraryService.checkCurrentUserSavedTracks(
+                authorization,
+                commaJoin(trackIds)
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    @RequiredScope({
+            Scope.USER_LIBRARY_READ
+    })
+    public Single<OffsetPage<SavedAlbum>> getSavedAlbums(@NotNull String authorization,
+                                                         @Nullable Integer limit,
+                                                         @Nullable Integer offset,
+                                                         @Nullable String market) {
+        requireNonNull(authorization);
+        return libraryService.getSavedAlbums(
+                authorization,
+                limit,
+                offset,
+                market
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    @RequiredScope({
+            Scope.USER_LIBRARY_READ
+    })
+    public Single<OffsetPage<SavedTrack>> getSavedTracks(@NotNull String authorization,
+                                                         @Nullable Integer limit,
+                                                         @Nullable Integer offset,
+                                                         @Nullable String market) {
+        requireNonNull(authorization);
+        return libraryService.getSavedTracks(
+                authorization,
+                limit,
+                offset,
+                market
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    @RequiredScope({
+            Scope.USER_LIBRARY_MODIFY
+    })
+    public Completable removeAlbums(@NotNull String authorization,
+                                    @NotNull Collection<String> albumIds) {
+        requireNonNull(authorization, albumIds);
+        return libraryService.removeAlbums(
+                authorization,
+                commaJoin(albumIds)
+        ).onErrorResumeNext(apiExceptionConverter::convertCompletable);
+    }
+
+    @RequiredScope({
+            Scope.USER_LIBRARY_MODIFY
+    })
+    public Completable removeTracks(@NotNull String authorization,
+                                    @NotNull Collection<String> trackIds) {
+        requireNonNull(authorization, trackIds);
+        return libraryService.removeTracks(
+                authorization,
+                commaJoin(trackIds)
+        ).onErrorResumeNext(apiExceptionConverter::convertCompletable);
+    }
+
+    @RequiredScope({
+            Scope.USER_LIBRARY_MODIFY
+    })
+    public Completable saveAlbums(@NotNull String authorization,
+                                  @NotNull Collection<String> albumIds) {
+        requireNonNull(authorization, albumIds);
+        return libraryService.saveAlbums(
+                authorization,
+                commaJoin(albumIds)
+        ).onErrorResumeNext(apiExceptionConverter::convertCompletable);
+    }
+
+    @RequiredScope({
+            Scope.USER_LIBRARY_MODIFY
+    })
+    public Completable saveTracks(@NotNull String authorization,
+                                  @NotNull Collection<String> trackIds) {
+        requireNonNull(authorization, trackIds);
+        return libraryService.saveTracks(
+                authorization,
+                commaJoin(trackIds)
+        ).onErrorResumeNext(apiExceptionConverter::convertCompletable);
+    }
 
     public static SpotifySDKBuilderSteps.ClientIdStep builder() {
         return new Builder();
@@ -942,6 +1047,7 @@ public final class SpotifySDK {
                     retrofit.create(TrackService.class),
                     retrofit.create(PlayerService.class),
                     retrofit.create(PlaylistService.class),
+                    retrofit.create(LibraryService.class),
                     new RxJavaExceptionConverter(
                             new ApiErrorConverter(
                                     retrofit.responseBodyConverter(
