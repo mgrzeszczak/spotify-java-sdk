@@ -285,9 +285,9 @@ public final class SpotifySDK {
 
     @RequiredScope({})
     public Single<Recommendations> getRecommendations(@NotNull String authorization,
-                                                      @Nullable List<String> seedArtists,
-                                                      @Nullable List<String> seedGenres,
-                                                      @Nullable List<String> seedTracks,
+                                                      @Nullable Collection<String> seedArtists,
+                                                      @Nullable Collection<String> seedGenres,
+                                                      @Nullable Collection<String> seedTracks,
                                                       @Nullable String limit,
                                                       @Nullable String market,
                                                       @Nullable TrackAttributes minTrackAttributes,
@@ -399,7 +399,7 @@ public final class SpotifySDK {
     })
     public Single<List<Boolean>> checkIfCurrentUserFollows(@NotNull String authorization,
                                                            @NotNull String type,
-                                                           @NotNull List<String> ids) {
+                                                           @NotNull Collection<String> ids) {
         requireNonNull(authorization, type, ids);
         return followService.checkIfCurrentUserFollows(
                 authorization,
@@ -412,7 +412,7 @@ public final class SpotifySDK {
     public Single<List<Boolean>> checkIfUsersFollowPlaylist(@NotNull String authorization,
                                                             @NotNull String ownerId,
                                                             @NotNull String playlistId,
-                                                            @NotNull List<String> userIds) {
+                                                            @NotNull Collection<String> userIds) {
         requireNonNull(authorization, ownerId, playlistId, userIds);
         return followService.checkIfUsersFollowPlaylist(
                 authorization,
@@ -427,7 +427,7 @@ public final class SpotifySDK {
     })
     public Completable followArtistOrUser(@NotNull String authorization,
                                           @NotNull String type,
-                                          @NotNull List<String> ids) {
+                                          @NotNull Collection<String> ids) {
         requireNonNull(authorization, type, ids);
         return followService.followArtistOrUser(
                 authorization,
@@ -441,7 +441,7 @@ public final class SpotifySDK {
     })
     public Completable unfollowArtistOrUser(@NotNull String authorization,
                                             @NotNull String type,
-                                            @NotNull List<String> ids) {
+                                            @NotNull Collection<String> ids) {
         requireNonNull(authorization, type, ids);
         return followService.unfollowArtistOrUser(
                 authorization,
