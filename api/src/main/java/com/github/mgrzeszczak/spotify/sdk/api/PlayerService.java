@@ -50,25 +50,25 @@ interface PlayerService {
                                 @Query("device_id") String deviceId);
 
 
-    @PUT("v1/me/player/repeat")
-    Single<Response<Void>> repeat(@Header("Authorization") String authorization,
-                                  @Query("state") String state,
-                                  @Query("device_id") String deviceId);
+    @PUT("v1/me/player/setRepeat")
+    Single<Response<Void>> setRepeat(@Header("Authorization") String authorization,
+                                     @Query("state") String state,
+                                     @Query("device_id") String deviceId);
 
 
-    @PUT("v1/me/player/volume")
-    Single<Response<Void>> volume(@Header("Authorization") String authorization,
-                                  @Query("volume_percent") int volumePercent,
-                                  @Query("device_id") String deviceId);
+    @PUT("v1/me/player/setVolume")
+    Single<Response<Void>> setVolume(@Header("Authorization") String authorization,
+                                     @Query("volume_percent") int volumePercent,
+                                     @Query("device_id") String deviceId);
 
 
-    @POST("v1/me/player/next")
-    Single<Response<Void>> next(@Header("Authorization") String authorization,
-                                @Query("device_id") String deviceId);
+    @POST("v1/me/player/playNextTrack")
+    Single<Response<Void>> playNextTrack(@Header("Authorization") String authorization,
+                                         @Query("device_id") String deviceId);
 
-    @POST("v1/me/player/previous")
-    Single<Response<Void>> previous(@Header("Authorization") String authorization,
-                                    @Query("device_id") String deviceId);
+    @POST("v1/me/player/playPreviousTrack")
+    Single<Response<Void>> playPreviousTrack(@Header("Authorization") String authorization,
+                                             @Query("device_id") String deviceId);
 
 
     @Headers("Content-Type: application/json")

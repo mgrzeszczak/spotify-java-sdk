@@ -52,10 +52,10 @@ interface FollowService {
 
 
     @GET("v1/me/following")
-    Single<ArtistsCursorPage> getFollowedArtists(@Header("Authorization") String authorization,
-                                                 @Query("type") String type,
-                                                 @Query("limit") String limit,
-                                                 @Query("after") String after);
+    Single<ArtistsCursorPage> getCurrentUserFollowedArtists(@Header("Authorization") String authorization,
+                                                            @Query("type") String type,
+                                                            @Query("limit") String limit,
+                                                            @Query("after") String after);
 
 
 }

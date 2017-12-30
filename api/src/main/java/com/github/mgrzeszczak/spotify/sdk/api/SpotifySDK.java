@@ -425,13 +425,12 @@ public final class SpotifySDK {
     @RequiredScope({
             Scope.USER_FOLLOW_MODIFY
     })
-    public Completable followArtistOrUser(@NotNull String authorization,
-                                          @NotNull String type,
-                                          @NotNull Collection<String> ids) {
-        requireNonNull(authorization, type, ids);
+    public Completable followArtists(@NotNull String authorization,
+                                     @NotNull Collection<String> ids) {
+        requireNonNull(authorization, ids);
         return followService.followArtistOrUser(
                 authorization,
-                type,
+                "artist",
                 commaJoin(ids)
         ).onErrorResumeNext(apiExceptionConverter::convertCompletable);
     }
@@ -439,13 +438,38 @@ public final class SpotifySDK {
     @RequiredScope({
             Scope.USER_FOLLOW_MODIFY
     })
-    public Completable unfollowArtistOrUser(@NotNull String authorization,
-                                            @NotNull String type,
-                                            @NotNull Collection<String> ids) {
-        requireNonNull(authorization, type, ids);
+    public Completable followUsers(@NotNull String authorization,
+                                   @NotNull Collection<String> ids) {
+        requireNonNull(authorization, ids);
+        return followService.followArtistOrUser(
+                authorization,
+                "user",
+                commaJoin(ids)
+        ).onErrorResumeNext(apiExceptionConverter::convertCompletable);
+    }
+
+    @RequiredScope({
+            Scope.USER_FOLLOW_MODIFY
+    })
+    public Completable unfollowArtists(@NotNull String authorization,
+                                       @NotNull Collection<String> ids) {
+        requireNonNull(authorization, ids);
         return followService.unfollowArtistOrUser(
                 authorization,
-                type,
+                "artist",
+                commaJoin(ids)
+        ).onErrorResumeNext(apiExceptionConverter::convertCompletable);
+    }
+
+    @RequiredScope({
+            Scope.USER_FOLLOW_MODIFY
+    })
+    public Completable unfollowUsers(@NotNull String authorization,
+                                     @NotNull Collection<String> ids) {
+        requireNonNull(authorization, ids);
+        return followService.unfollowArtistOrUser(
+                authorization,
+                "user",
                 commaJoin(ids)
         ).onErrorResumeNext(apiExceptionConverter::convertCompletable);
     }
@@ -485,11 +509,11 @@ public final class SpotifySDK {
     @RequiredScope({
             Scope.USER_FOLLOW_READ
     })
-    public Single<ArtistsCursorPage> getFollowedArtists(@NotNull String authorization,
-                                                        @Nullable String limit,
-                                                        @Nullable String after) {
+    public Single<ArtistsCursorPage> getCurrentUserFollowedArtists(@NotNull String authorization,
+                                                                   @Nullable String limit,
+                                                                   @Nullable String after) {
         requireNonNull(authorization);
-        return followService.getFollowedArtists(
+        return followService.getCurrentUserFollowedArtists(
                 authorization,
                 "artist",
                 limit,
@@ -606,7 +630,7 @@ public final class SpotifySDK {
     @RequiredScope({
             Scope.USER_READ_PLAYBACK_STATE
     })
-    public Single<Response<DeviceContainer>> getUserAvailableDevices(@NotNull String authorization) {
+    public Single<Response<DeviceContainer>> getCurrentUserAvailableDevices(@NotNull String authorization) {
         requireNonNull(authorization);
         return playerService.getUserAvailableDevices(
                 authorization
@@ -617,10 +641,10 @@ public final class SpotifySDK {
     @RequiredScope({
             Scope.USER_MODIFY_PLAYBACK_STATE
     })
-    public Single<Response<Void>> next(@NotNull String authorization,
-                                       @Nullable String deviceId) {
+    public Single<Response<Void>> playNextTrack(@NotNull String authorization,
+                                                @Nullable String deviceId) {
         requireNonNull(authorization);
-        return playerService.next(
+        return playerService.playNextTrack(
                 authorization,
                 deviceId
         ).onErrorResumeNext(apiExceptionConverter::convertSingle);
@@ -630,10 +654,10 @@ public final class SpotifySDK {
     @RequiredScope({
             Scope.USER_MODIFY_PLAYBACK_STATE
     })
-    public Single<Response<Void>> previous(@NotNull String authorization,
-                                           @Nullable String deviceId) {
+    public Single<Response<Void>> playPreviousTrack(@NotNull String authorization,
+                                                    @Nullable String deviceId) {
         requireNonNull(authorization);
-        return playerService.next(
+        return playerService.playPreviousTrack(
                 authorization,
                 deviceId
         ).onErrorResumeNext(apiExceptionConverter::convertSingle);
@@ -698,11 +722,11 @@ public final class SpotifySDK {
     @RequiredScope({
             Scope.USER_MODIFY_PLAYBACK_STATE
     })
-    public Single<Response<Void>> repeat(@NotNull String authorization,
-                                         @NotNull String state,
-                                         @Nullable String deviceId) {
+    public Single<Response<Void>> setRepeat(@NotNull String authorization,
+                                            @NotNull String state,
+                                            @Nullable String deviceId) {
         requireNonNull(authorization);
-        return playerService.repeat(
+        return playerService.setRepeat(
                 authorization,
                 state,
                 deviceId
@@ -713,11 +737,11 @@ public final class SpotifySDK {
     @RequiredScope({
             Scope.USER_MODIFY_PLAYBACK_STATE
     })
-    public Single<Response<Void>> volume(@NotNull String authorization,
-                                         int volumePercent,
-                                         @Nullable String deviceId) {
+    public Single<Response<Void>> setVolume(@NotNull String authorization,
+                                            int volumePercent,
+                                            @Nullable String deviceId) {
         requireNonNull(authorization);
-        return playerService.volume(
+        return playerService.setVolume(
                 authorization,
                 volumePercent,
                 deviceId

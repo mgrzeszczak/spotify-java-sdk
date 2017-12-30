@@ -60,11 +60,11 @@ public class App {
         TokenData tokenData = spotify.getToken(authorizationCode, REDIRECT_URI).blockingGet();
         String authorization = "Bearer " + tokenData.getAccessToken();
 
-        spotify.next(authorization, null).subscribe(r -> LOGGER.info(r.code()));
-        spotify.previous(authorization, null).subscribe(r -> LOGGER.info(r.code()));
-        spotify.previous(authorization, null).subscribe(r -> LOGGER.info(r.code()));
-        spotify.volume(authorization, 10, null).subscribe(r -> LOGGER.info(r.code()));
-        spotify.volume(authorization, 100, null).subscribe(r -> LOGGER.info(r.code()));
+        spotify.playNextTrack(authorization, null).subscribe(r -> LOGGER.info(r.code()));
+        spotify.playPreviousTrack(authorization, null).subscribe(r -> LOGGER.info(r.code()));
+        spotify.playPreviousTrack(authorization, null).subscribe(r -> LOGGER.info(r.code()));
+        spotify.setVolume(authorization, 10, null).subscribe(r -> LOGGER.info(r.code()));
+        spotify.setVolume(authorization, 100, null).subscribe(r -> LOGGER.info(r.code()));
 
         spotify.getCurrentlyPlaying(authorization, null).subscribe(r -> LOGGER.info(r.body()));
         spotify.getCurrentPlayback(authorization, null).subscribe(r -> LOGGER.info(r.body()));
@@ -103,13 +103,13 @@ public class App {
         LOGGER.info(recommendations);
 
         spotify.getCurrentUserProfile(authorization).subscribe((Consumer<UserPrivate>) LOGGER::info);
-        ArtistsCursorPage artistsCursorPage = spotify.getFollowedArtists(authorization, null, null).blockingGet();
+        ArtistsCursorPage artistsCursorPage = spotify.getCurrentUserFollowedArtists(authorization, null, null).blockingGet();
         CursorPage<Artist> page = artistsCursorPage.getArtists();
         List<Artist> items = page.getItems();
         if (items.size() > 0) {
             Artist followedArtist = items.get(0);
             LOGGER.info("Unfollowing " + artist.getName());
-            spotify.unfollowArtistOrUser(authorization, "artist", Collections.singletonList(followedArtist.getId()))
+            spotify.unfollowArtists(authorization, Collections.singletonList(followedArtist.getId()))
                     .subscribe(() -> LOGGER.info("Unfollowed!"));
         }
     }
