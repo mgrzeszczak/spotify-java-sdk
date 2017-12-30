@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.github.mgrzeszczak.spotify.sdk.api.annotation.Beta;
+import com.github.mgrzeszczak.spotify.sdk.api.annotation.RequiredScope;
 import com.github.mgrzeszczak.spotify.sdk.model.Album;
 import com.github.mgrzeszczak.spotify.sdk.model.AlbumContainer;
 import com.github.mgrzeszczak.spotify.sdk.model.AlbumSimplified;
@@ -28,11 +29,18 @@ import com.github.mgrzeszczak.spotify.sdk.model.CurrentlyPlaying;
 import com.github.mgrzeszczak.spotify.sdk.model.CursorPage;
 import com.github.mgrzeszczak.spotify.sdk.model.DeviceContainer;
 import com.github.mgrzeszczak.spotify.sdk.model.ErrorHolder;
+import com.github.mgrzeszczak.spotify.sdk.model.Image;
 import com.github.mgrzeszczak.spotify.sdk.model.OffsetPage;
 import com.github.mgrzeszczak.spotify.sdk.model.PlayHistory;
 import com.github.mgrzeszczak.spotify.sdk.model.PlayParameters;
+import com.github.mgrzeszczak.spotify.sdk.model.Playlist;
+import com.github.mgrzeszczak.spotify.sdk.model.PlaylistParameters;
 import com.github.mgrzeszczak.spotify.sdk.model.PlaylistSimplified;
+import com.github.mgrzeszczak.spotify.sdk.model.PlaylistTrack;
+import com.github.mgrzeszczak.spotify.sdk.model.PlaylistTrackRemovalParameters;
+import com.github.mgrzeszczak.spotify.sdk.model.PlaylistTrackReorderParameters;
 import com.github.mgrzeszczak.spotify.sdk.model.Recommendations;
+import com.github.mgrzeszczak.spotify.sdk.model.SnapshotIdContainer;
 import com.github.mgrzeszczak.spotify.sdk.model.Track;
 import com.github.mgrzeszczak.spotify.sdk.model.TrackAttributes;
 import com.github.mgrzeszczak.spotify.sdk.model.TrackContainer;
@@ -40,6 +48,7 @@ import com.github.mgrzeszczak.spotify.sdk.model.TransferPlaybackParameters;
 import com.github.mgrzeszczak.spotify.sdk.model.UserPrivate;
 import com.github.mgrzeszczak.spotify.sdk.model.UserPublic;
 import com.github.mgrzeszczak.spotify.sdk.model.authorization.AuthError;
+import com.github.mgrzeszczak.spotify.sdk.model.authorization.Scope;
 import com.github.mgrzeszczak.spotify.sdk.model.authorization.TokenData;
 
 import io.reactivex.Completable;
@@ -73,6 +82,7 @@ public final class SpotifySDK {
     private final PersonalizationService personalizationService;
     private final TrackService trackService;
     private final PlayerService playerService;
+    private final PlaylistService playlistService;
 
     private final RxJavaExceptionConverter apiExceptionConverter;
     private final RxJavaExceptionConverter authExceptionConverter;
@@ -660,7 +670,207 @@ public final class SpotifySDK {
         ).onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
-    // TODO: Playlists, Library
+    @RequiredScope({
+            Scope.PLAYLIST_MODIFY_PRIVATE,
+            Scope.PLAYLIST_MODIFY_PUBLIC
+    })
+    public Single<SnapshotIdContainer> addTracksToPlaylist(@NotNull String authorization,
+                                                           @NotNull String userId,
+                                                           @NotNull String playlistId,
+                                                           @NotNull Collection<String> trackUris,
+                                                           @Nullable Integer position) {
+        requireNonNull(authorization, userId, playlistId, trackUris);
+        return playlistService.addTracksToPlaylist(
+                authorization,
+                userId,
+                playlistId,
+                commaJoin(trackUris),
+                position
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    @RequiredScope({
+            Scope.PLAYLIST_MODIFY_PRIVATE,
+            Scope.PLAYLIST_MODIFY_PUBLIC
+    })
+    public Completable changePlaylistDetails(@NotNull String authorization,
+                                             @NotNull String userId,
+                                             @NotNull String playlistId,
+                                             @NotNull PlaylistParameters playlistParameters) {
+        requireNonNull(authorization, userId, playlistId, playlistParameters);
+        return playlistService.changePlaylistDetails(
+                authorization,
+                userId,
+                playlistId,
+                playlistParameters
+        ).onErrorResumeNext(apiExceptionConverter::convertCompletable);
+    }
+
+    @RequiredScope({
+            Scope.PLAYLIST_MODIFY_PRIVATE,
+            Scope.PLAYLIST_MODIFY_PUBLIC
+    })
+    public Single<Playlist> createPlaylist(@NotNull String authorization,
+                                           @NotNull String userId,
+                                           @NotNull PlaylistParameters playlistParameters) {
+        requireNonNull(authorization, userId, playlistParameters);
+        return playlistService.createPlaylist(
+                authorization,
+                userId,
+                playlistParameters
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    @RequiredScope({
+            Scope.PLAYLIST_READ_PRIVATE,
+            Scope.PLAYLIST_READ_COLLABORATIVE
+    })
+    public Single<OffsetPage<PlaylistSimplified>> getCurrentUserPlaylists(@NotNull String authorization,
+                                                                          @Nullable Integer limit,
+                                                                          @Nullable Integer offset) {
+        requireNonNull(authorization);
+        return playlistService.getCurrentUserPlaylists(
+                authorization,
+                limit,
+                offset
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    @RequiredScope({
+            Scope.PLAYLIST_READ_PRIVATE,
+            Scope.PLAYLIST_READ_COLLABORATIVE
+    })
+    public Single<OffsetPage<PlaylistSimplified>> getUserPlaylists(@NotNull String authorization,
+                                                                   @NotNull String userId,
+                                                                   @Nullable Integer limit,
+                                                                   @Nullable Integer offset) {
+        requireNonNull(authorization, userId);
+        return playlistService.getUserPlaylists(
+                authorization,
+                userId,
+                limit,
+                offset
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    @RequiredScope({})
+    public Single<List<Image>> getPlaylistCoverImages(@NotNull String authorization,
+                                                      @NotNull String userId,
+                                                      @NotNull String playlistId) {
+        requireNonNull(authorization, userId, playlistId);
+        return playlistService.getPlaylistCoverImages(
+                authorization,
+                userId,
+                playlistId
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    @RequiredScope({})
+    public Single<Playlist> getPlaylist(@NotNull String authorization,
+                                        @NotNull String userId,
+                                        @NotNull String playlistId,
+                                        @Nullable Collection<String> fields,
+                                        @Nullable String market) {
+        requireNonNull(authorization, userId, playlistId);
+        return playlistService.getPlaylist(
+                authorization,
+                userId,
+                playlistId,
+                commaJoin(fields),
+                market
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    @RequiredScope({})
+    public Single<OffsetPage<PlaylistTrack>> getPlaylistTracks(@NotNull String authorization,
+                                                               @NotNull String userId,
+                                                               @NotNull String playlistId,
+                                                               @Nullable Collection<String> fields,
+                                                               @Nullable Integer limit,
+                                                               @Nullable Integer offset,
+                                                               @Nullable String market) {
+        requireNonNull(authorization, userId, playlistId);
+        return playlistService.getPlaylistTracks(
+                authorization,
+                userId,
+                playlistId,
+                commaJoin(fields),
+                limit,
+                offset,
+                market
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    @RequiredScope({
+            Scope.PLAYLIST_MODIFY_PRIVATE,
+            Scope.PLAYLIST_MODIFY_PUBLIC
+    })
+    public Single<SnapshotIdContainer> removeTracksFromPlaylist(@NotNull String authorization,
+                                                                @NotNull String userId,
+                                                                @NotNull String playlistId,
+                                                                @NotNull PlaylistTrackRemovalParameters parameters) {
+        requireNonNull(authorization, userId, playlistId, parameters);
+        return playlistService.removeTracksFromPlaylist(
+                authorization,
+                userId,
+                playlistId,
+                parameters
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    @RequiredScope({
+            Scope.PLAYLIST_MODIFY_PRIVATE,
+            Scope.PLAYLIST_MODIFY_PUBLIC
+    })
+    public Single<SnapshotIdContainer> reorderPlaylistTracks(@NotNull String authorization,
+                                                             @NotNull String userId,
+                                                             @NotNull String playlistId,
+                                                             @NotNull PlaylistTrackReorderParameters parameters) {
+        requireNonNull(authorization, userId, playlistId, parameters);
+        return playlistService.reorderPlaylistTracks(
+                authorization,
+                userId,
+                playlistId,
+                parameters
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    @RequiredScope({
+            Scope.PLAYLIST_MODIFY_PRIVATE,
+            Scope.PLAYLIST_MODIFY_PUBLIC
+    })
+    public Completable replacePlaylistTracks(@NotNull String authorization,
+                                             @NotNull String userId,
+                                             @NotNull String playlistId,
+                                             @NotNull Collection<String> trackUris) {
+        requireNonNull(authorization, userId, playlistId, trackUris);
+        return playlistService.replacePlaylistTracks(
+                authorization,
+                userId,
+                playlistId,
+                commaJoin(trackUris)
+        ).onErrorResumeNext(apiExceptionConverter::convertCompletable);
+    }
+
+    @RequiredScope({
+            Scope.PLAYLIST_MODIFY_PRIVATE,
+            Scope.PLAYLIST_MODIFY_PUBLIC,
+            Scope.UGC_IMAGE_UPLOAD
+    })
+    public Completable updatePlaylistCover(@NotNull String authorization,
+                                           @NotNull String userId,
+                                           @NotNull String playlistId,
+                                           @NotNull String base64JpegImage) {
+        requireNonNull(authorization, userId, playlistId, base64JpegImage);
+        return playlistService.updatePlaylistCover(
+                authorization,
+                userId,
+                playlistId,
+                base64JpegImage
+        ).onErrorResumeNext(apiExceptionConverter::convertCompletable);
+    }
+
+    // TODO: Library
 
     public static SpotifySDKBuilderSteps.ClientIdStep builder() {
         return new Builder();
@@ -731,6 +941,7 @@ public final class SpotifySDK {
                     retrofit.create(PersonalizationService.class),
                     retrofit.create(TrackService.class),
                     retrofit.create(PlayerService.class),
+                    retrofit.create(PlaylistService.class),
                     new RxJavaExceptionConverter(
                             new ApiErrorConverter(
                                     retrofit.responseBodyConverter(
