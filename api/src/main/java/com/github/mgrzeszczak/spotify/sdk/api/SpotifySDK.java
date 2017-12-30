@@ -113,6 +113,7 @@ public final class SpotifySDK {
         ).onErrorResumeNext(authExceptionConverter::convertSingle);
     }
 
+    @RequiredScope({})
     public Single<Album> getAlbum(@NotNull String authorization,
                                   @NotNull String albumId,
                                   @Nullable String market) {
@@ -124,6 +125,7 @@ public final class SpotifySDK {
         ).onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
+    @RequiredScope({})
     public Single<AlbumContainer> getAlbums(@NotNull String authorization,
                                             @NotNull Collection<String> albumIds,
                                             @Nullable String market) {
@@ -132,6 +134,7 @@ public final class SpotifySDK {
                 .onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
+    @RequiredScope({})
     public Single<OffsetPage<Track>> getAlbumTracks(@NotNull String authorization,
                                                     @NotNull String albumId,
                                                     @Nullable Integer limit,
@@ -147,6 +150,7 @@ public final class SpotifySDK {
         ).onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
+    @RequiredScope({})
     public Single<Artist> getArtist(@NotNull String authorization,
                                     @NotNull String artistId) {
         requireNonNull(authorization, artistId);
@@ -156,6 +160,7 @@ public final class SpotifySDK {
         ).onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
+    @RequiredScope({})
     public Single<ArtistContainer> getArtists(@NotNull String authorization,
                                               @NotNull Collection<String> artistIds) {
         requireNonNull(authorization, artistIds);
@@ -165,6 +170,7 @@ public final class SpotifySDK {
         ).onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
+    @RequiredScope({})
     public Single<ArtistContainer> getRelatedArtists(@NotNull String authorization,
                                                      @NotNull String artistId) {
         requireNonNull(authorization, artistId);
@@ -172,6 +178,7 @@ public final class SpotifySDK {
                 .onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
+    @RequiredScope({})
     public Single<TrackContainer> getArtistTopTracks(@NotNull String authorization,
                                                      @NotNull String artistId,
                                                      @NotNull String country) {
@@ -180,6 +187,7 @@ public final class SpotifySDK {
                 .onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
+    @RequiredScope({})
     public Single<OffsetPage<Album>> getArtistAlbums(@NotNull String authorization,
                                                      @NotNull String artistId,
                                                      @Nullable Collection<String> albumTypes,
@@ -197,6 +205,7 @@ public final class SpotifySDK {
         ).onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
+    @RequiredScope({})
     public Single<Category> getCategory(@NotNull String authorization,
                                         @NotNull String categoryId,
                                         @Nullable String country,
@@ -210,6 +219,7 @@ public final class SpotifySDK {
         ).onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
+    @RequiredScope({})
     public Single<OffsetPage<PlaylistSimplified>> getCategoryPlaylists(@NotNull String authorization,
                                                                        @NotNull String categoryId,
                                                                        @Nullable String country,
@@ -225,6 +235,7 @@ public final class SpotifySDK {
         ).onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
+    @RequiredScope({})
     public Single<OffsetPage<Category>> getCategories(@NotNull String authorization,
                                                       @Nullable String locale,
                                                       @Nullable String country,
@@ -240,6 +251,7 @@ public final class SpotifySDK {
         ).onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
+    @RequiredScope({})
     public Single<OffsetPage<PlaylistSimplified>> getFeaturedPlaylists(@NotNull String authorization,
                                                                        @Nullable String locale,
                                                                        @Nullable String country,
@@ -257,6 +269,7 @@ public final class SpotifySDK {
         ).onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
+    @RequiredScope({})
     public Single<OffsetPage<AlbumSimplified>> getNewReleases(@NotNull String authorization,
                                                               @Nullable String country,
                                                               @Nullable Integer limit,
@@ -270,6 +283,7 @@ public final class SpotifySDK {
         ).onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
+    @RequiredScope({})
     public Single<Recommendations> getRecommendations(@NotNull String authorization,
                                                       @Nullable List<String> seedArtists,
                                                       @Nullable List<String> seedGenres,
@@ -293,6 +307,7 @@ public final class SpotifySDK {
         ).onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
+    @RequiredScope({})
     public Single<OffsetPage<Artist>> searchArtists(@NotNull String authorization,
                                                     @NotNull String query,
                                                     @Nullable String market,
@@ -309,6 +324,7 @@ public final class SpotifySDK {
         ).onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
+    @RequiredScope({})
     public Single<OffsetPage<AlbumSimplified>> searchAlbums(@NotNull String authorization,
                                                             @NotNull String query,
                                                             @Nullable String market,
@@ -325,6 +341,7 @@ public final class SpotifySDK {
         ).onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
+    @RequiredScope({})
     public Single<OffsetPage<Track>> searchTracks(@NotNull String authorization,
                                                   @NotNull String query,
                                                   @Nullable String market,
@@ -341,6 +358,7 @@ public final class SpotifySDK {
         ).onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
+    @RequiredScope({})
     public Single<OffsetPage<PlaylistSimplified>> searchPlaylists(@NotNull String authorization,
                                                                   @NotNull String query,
                                                                   @Nullable String market,
@@ -357,12 +375,18 @@ public final class SpotifySDK {
         ).onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
+    @RequiredScope({
+            Scope.USER_READ_PRIVATE,
+            Scope.USER_READ_EMAIL,
+            Scope.USER_READ_BIRTHDATE
+    })
     public Single<UserPrivate> getCurrentUserProfile(@NotNull String authorization) {
         requireNonNull(authorization);
         return userService.getCurrentUserProfile(authorization)
                 .onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
+    @RequiredScope({})
     public Single<UserPublic> getUserProfile(@NotNull String authorization,
                                              @NotNull String userId) {
         requireNonNull(authorization, userId);
@@ -370,7 +394,9 @@ public final class SpotifySDK {
                 .onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
-
+    @RequiredScope({
+            Scope.USER_FOLLOW_READ
+    })
     public Single<List<Boolean>> checkIfCurrentUserFollows(@NotNull String authorization,
                                                            @NotNull String type,
                                                            @NotNull List<String> ids) {
@@ -382,6 +408,7 @@ public final class SpotifySDK {
         ).onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
+    @RequiredScope({})
     public Single<List<Boolean>> checkIfUsersFollowPlaylist(@NotNull String authorization,
                                                             @NotNull String ownerId,
                                                             @NotNull String playlistId,
@@ -395,6 +422,9 @@ public final class SpotifySDK {
         ).onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
+    @RequiredScope({
+            Scope.USER_FOLLOW_MODIFY
+    })
     public Completable followArtistOrUser(@NotNull String authorization,
                                           @NotNull String type,
                                           @NotNull List<String> ids) {
@@ -406,6 +436,9 @@ public final class SpotifySDK {
         ).onErrorResumeNext(apiExceptionConverter::convertCompletable);
     }
 
+    @RequiredScope({
+            Scope.USER_FOLLOW_MODIFY
+    })
     public Completable unfollowArtistOrUser(@NotNull String authorization,
                                             @NotNull String type,
                                             @NotNull List<String> ids) {
@@ -417,6 +450,10 @@ public final class SpotifySDK {
         ).onErrorResumeNext(apiExceptionConverter::convertCompletable);
     }
 
+    @RequiredScope({
+            Scope.PLAYLIST_MODIFY_PUBLIC,
+            Scope.PLAYLIST_MODIFY_PRIVATE
+    })
     public Completable followPlaylist(@NotNull String authorization,
                                       @NotNull String ownerId,
                                       @NotNull String playlistId,
@@ -430,6 +467,10 @@ public final class SpotifySDK {
         ).onErrorResumeNext(apiExceptionConverter::convertCompletable);
     }
 
+    @RequiredScope({
+            Scope.PLAYLIST_MODIFY_PUBLIC,
+            Scope.PLAYLIST_MODIFY_PRIVATE
+    })
     public Completable unfollowPlaylist(@NotNull String authorization,
                                         @NotNull String ownerId,
                                         @NotNull String playlistId) {
@@ -441,6 +482,9 @@ public final class SpotifySDK {
         ).onErrorResumeNext(apiExceptionConverter::convertCompletable);
     }
 
+    @RequiredScope({
+            Scope.USER_FOLLOW_READ
+    })
     public Single<ArtistsCursorPage> getFollowedArtists(@NotNull String authorization,
                                                         @Nullable String limit,
                                                         @Nullable String after) {
@@ -453,6 +497,9 @@ public final class SpotifySDK {
         ).onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
+    @RequiredScope({
+            Scope.USER_TOP_READ
+    })
     public Single<OffsetPage<Artist>> getCurrentUserTopArtists(@NotNull String authorization,
                                                                @Nullable Integer limit,
                                                                @Nullable Integer offset,
@@ -467,6 +514,9 @@ public final class SpotifySDK {
         ).onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
+    @RequiredScope({
+            Scope.USER_TOP_READ
+    })
     public Single<OffsetPage<Track>> getCurrentUserTopTracks(@NotNull String authorization,
                                                              @Nullable Integer limit,
                                                              @Nullable Integer offset,
@@ -481,7 +531,7 @@ public final class SpotifySDK {
         ).onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
-
+    @RequiredScope({})
     public Single<Track> getTrack(@NotNull String authorization,
                                   @NotNull String trackId,
                                   @Nullable String market) {
@@ -493,6 +543,7 @@ public final class SpotifySDK {
         ).onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
+    @RequiredScope({})
     public Single<TrackContainer> getTracks(@NotNull String authorization,
                                             @NotNull Collection<String> trackIds,
                                             @Nullable String market) {
@@ -504,6 +555,7 @@ public final class SpotifySDK {
         ).onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
+    @RequiredScope({})
     public Single<AudioFeatures> getTrackAudioFeatures(@NotNull String authorization,
                                                        @NotNull String trackId) {
         requireNonNull(authorization, trackId);
@@ -513,6 +565,7 @@ public final class SpotifySDK {
         ).onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
+    @RequiredScope({})
     public Single<AudioFeaturesContainer> getTracksAudioFeatures(@NotNull String authorization,
                                                                  @NotNull Collection<String> trackIds) {
         requireNonNull(authorization, trackIds);
@@ -522,6 +575,7 @@ public final class SpotifySDK {
         ).onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
 
+    @RequiredScope({})
     public Single<Map<String, Object>> getTrackAudioAnalysis(@NotNull String authorization,
                                                              @NotNull String trackId) {
         requireNonNull(authorization, trackId);
@@ -532,6 +586,9 @@ public final class SpotifySDK {
     }
 
     @Beta
+    @RequiredScope({
+            Scope.USER_READ_RECENTLY_PLAYED
+    })
     public Single<CursorPage<PlayHistory>> getRecentlyPlayed(@NotNull String authorization,
                                                              @Nullable Integer limit,
                                                              @Nullable Long after,
@@ -546,6 +603,9 @@ public final class SpotifySDK {
     }
 
     @Beta
+    @RequiredScope({
+            Scope.USER_READ_PLAYBACK_STATE
+    })
     public Single<Response<DeviceContainer>> getUserAvailableDevices(@NotNull String authorization) {
         requireNonNull(authorization);
         return playerService.getUserAvailableDevices(
@@ -554,6 +614,9 @@ public final class SpotifySDK {
     }
 
     @Beta
+    @RequiredScope({
+            Scope.USER_MODIFY_PLAYBACK_STATE
+    })
     public Single<Response<Void>> next(@NotNull String authorization,
                                        @Nullable String deviceId) {
         requireNonNull(authorization);
@@ -564,6 +627,9 @@ public final class SpotifySDK {
     }
 
     @Beta
+    @RequiredScope({
+            Scope.USER_MODIFY_PLAYBACK_STATE
+    })
     public Single<Response<Void>> previous(@NotNull String authorization,
                                            @Nullable String deviceId) {
         requireNonNull(authorization);
@@ -574,6 +640,10 @@ public final class SpotifySDK {
     }
 
     @Beta
+    @RequiredScope({
+            Scope.USER_READ_CURRENTLY_PLAYING,
+            Scope.USER_READ_PLAYBACK_STATE
+    })
     public Single<Response<CurrentlyPlaying>> getCurrentlyPlaying(@NotNull String authorization,
                                                                   @Nullable String market) {
         requireNonNull(authorization);
@@ -584,6 +654,9 @@ public final class SpotifySDK {
     }
 
     @Beta
+    @RequiredScope({
+            Scope.USER_READ_PLAYBACK_STATE
+    })
     public Single<Response<CurrentPlayback>> getCurrentPlayback(@NotNull String authorization,
                                                                 @Nullable String market) {
         requireNonNull(authorization);
@@ -594,6 +667,9 @@ public final class SpotifySDK {
     }
 
     @Beta
+    @RequiredScope({
+            Scope.USER_MODIFY_PLAYBACK_STATE
+    })
     public Single<Response<Void>> pause(@NotNull String authorization,
                                         @Nullable String deviceId) {
         requireNonNull(authorization);
@@ -604,6 +680,9 @@ public final class SpotifySDK {
     }
 
     @Beta
+    @RequiredScope({
+            Scope.USER_MODIFY_PLAYBACK_STATE
+    })
     public Single<Response<Void>> seek(@NotNull String authorization,
                                        long positionMs,
                                        @Nullable String deviceId) {
@@ -616,6 +695,9 @@ public final class SpotifySDK {
     }
 
     @Beta
+    @RequiredScope({
+            Scope.USER_MODIFY_PLAYBACK_STATE
+    })
     public Single<Response<Void>> repeat(@NotNull String authorization,
                                          @NotNull String state,
                                          @Nullable String deviceId) {
@@ -628,6 +710,9 @@ public final class SpotifySDK {
     }
 
     @Beta
+    @RequiredScope({
+            Scope.USER_MODIFY_PLAYBACK_STATE
+    })
     public Single<Response<Void>> volume(@NotNull String authorization,
                                          int volumePercent,
                                          @Nullable String deviceId) {
@@ -640,6 +725,9 @@ public final class SpotifySDK {
     }
 
     @Beta
+    @RequiredScope({
+            Scope.USER_MODIFY_PLAYBACK_STATE
+    })
     public Single<Response<Void>> play(@NotNull String authorization,
                                        @NotNull PlayParameters playParameters,
                                        @Nullable String deviceId) {
@@ -652,6 +740,9 @@ public final class SpotifySDK {
     }
 
     @Beta
+    @RequiredScope({
+            Scope.USER_MODIFY_PLAYBACK_STATE
+    })
     public Single<Response<Void>> shuffle(@NotNull String authorization,
                                           boolean state,
                                           @Nullable String deviceId) {
@@ -664,6 +755,9 @@ public final class SpotifySDK {
     }
 
     @Beta
+    @RequiredScope({
+            Scope.USER_MODIFY_PLAYBACK_STATE
+    })
     public Single<Response<Void>> transferPlayback(@NotNull String authorization,
                                                    @NotNull TransferPlaybackParameters transferPlaybackParameters) {
         requireNonNull(authorization, transferPlaybackParameters);
@@ -1048,20 +1142,17 @@ public final class SpotifySDK {
                     retrofit.create(PlayerService.class),
                     retrofit.create(PlaylistService.class),
                     retrofit.create(LibraryService.class),
-                    new RxJavaExceptionConverter(
-                            new ApiErrorConverter(
-                                    retrofit.responseBodyConverter(
-                                            ErrorHolder.class,
-                                            new Annotation[0]
-                                    )
-                            )
-                    ),
-                    new RxJavaExceptionConverter(
-                            new AuthErrorConverter(
-                                    retrofit.responseBodyConverter(
-                                            AuthError.class,
-                                            new Annotation[0]
-                                    )
+                    createExceptionConverter(retrofit, ErrorHolder.class),
+                    createExceptionConverter(retrofit, AuthError.class)
+            );
+        }
+
+        private RxJavaExceptionConverter createExceptionConverter(Retrofit retrofit, Class<?> javaClass) {
+            return new RxJavaExceptionConverter(
+                    new AuthErrorConverter(
+                            retrofit.responseBodyConverter(
+                                    javaClass,
+                                    new Annotation[0]
                             )
                     )
             );
