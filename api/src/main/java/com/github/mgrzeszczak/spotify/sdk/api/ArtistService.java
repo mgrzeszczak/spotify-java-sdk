@@ -1,10 +1,11 @@
 package com.github.mgrzeszczak.spotify.sdk.api;
 
+import java.util.List;
+
 import com.github.mgrzeszczak.spotify.sdk.model.Album;
 import com.github.mgrzeszczak.spotify.sdk.model.Artist;
-import com.github.mgrzeszczak.spotify.sdk.model.ArtistContainer;
 import com.github.mgrzeszczak.spotify.sdk.model.OffsetPage;
-import com.github.mgrzeszczak.spotify.sdk.model.TrackContainer;
+import com.github.mgrzeszczak.spotify.sdk.model.Track;
 
 import io.reactivex.Single;
 import retrofit2.http.GET;
@@ -19,8 +20,8 @@ interface ArtistService {
                              @Path("id") String id);
 
     @GET("v1/artists")
-    Single<ArtistContainer> getArtists(@Header("Authorization") String authorization,
-                                       @Query("ids") String ids);
+    Single<Wrapper<List<Artist>>> getArtists(@Header("Authorization") String authorization,
+                                             @Query("ids") String ids);
 
 
     @GET("v1/artists/{id}/albums")
@@ -33,14 +34,14 @@ interface ArtistService {
 
 
     @GET("v1/artists/{id}/top-tracks")
-    Single<TrackContainer> getArtistTopTracks(@Header("Authorization") String authorization,
-                                              @Path("id") String id,
-                                              @Query("country") String country);
+    Single<Wrapper<List<Track>>> getArtistTopTracks(@Header("Authorization") String authorization,
+                                                    @Path("id") String id,
+                                                    @Query("country") String country);
 
 
     @GET("v1/artists/{id}/related-artists")
-    Single<ArtistContainer> getRelatedArtists(@Header("Authorization") String authorization,
-                                              @Path("id") String id);
+    Single<Wrapper<List<Artist>>> getRelatedArtists(@Header("Authorization") String authorization,
+                                                    @Path("id") String id);
 
 
 }

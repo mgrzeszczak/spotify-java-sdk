@@ -5,8 +5,8 @@ import lombok.Data;
 
 @Data
 @Builder
-public class AlbumSimplifiedPageContainer {
+public class SnapshotId {
 
-    private OffsetPage<AlbumSimplified> albums;
+    private String snapshotId;
 
 }

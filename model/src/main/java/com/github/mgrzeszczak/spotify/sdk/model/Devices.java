@@ -1,12 +1,14 @@
 package com.github.mgrzeszczak.spotify.sdk.model;
 
+import java.util.List;
+
 import lombok.Builder;
 import lombok.Data;
 
 @Data
 @Builder
-public class TracksPageContainer {
+public class Devices {
 
-    private OffsetPage<Track> tracks;
+    private List<Device> devices;
 
 }

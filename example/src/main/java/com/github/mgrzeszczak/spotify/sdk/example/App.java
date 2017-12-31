@@ -9,9 +9,7 @@ import org.apache.logging.log4j.Logger;
 import com.github.mgrzeszczak.spotify.sdk.api.SpotifySDK;
 import com.github.mgrzeszczak.spotify.sdk.model.Album;
 import com.github.mgrzeszczak.spotify.sdk.model.Artist;
-import com.github.mgrzeszczak.spotify.sdk.model.ArtistContainer;
 import com.github.mgrzeszczak.spotify.sdk.model.ArtistSimplified;
-import com.github.mgrzeszczak.spotify.sdk.model.ArtistsCursorPage;
 import com.github.mgrzeszczak.spotify.sdk.model.CursorPage;
 import com.github.mgrzeszczak.spotify.sdk.model.PlayParameters;
 import com.github.mgrzeszczak.spotify.sdk.model.Recommendations;
@@ -24,7 +22,6 @@ import io.reactivex.functions.Consumer;
 public class App {
 
     private static final Logger LOGGER = LogManager.getLogger(App.class);
-
 
     public static void main(String[] args) throws Exception {
         SpotifyAccess spotifyAccess = AuthorizationProvider.getSpotifyAccess();
@@ -59,7 +56,7 @@ public class App {
         LOGGER.info(artist);
 
         spotify.getRelatedArtists(authorization, artist.getId())
-                .subscribe((Consumer<ArtistContainer>) LOGGER::info);
+                .subscribe(LOGGER::info);
 
         Recommendations recommendations = spotify.getRecommendations(
                 authorization,
@@ -75,8 +72,7 @@ public class App {
         LOGGER.info(recommendations);
 
         spotify.getCurrentUserProfile(authorization).subscribe((Consumer<UserPrivate>) LOGGER::info);
-        ArtistsCursorPage artistsCursorPage = spotify.getCurrentUserFollowedArtists(authorization, null, null).blockingGet();
-        CursorPage<Artist> page = artistsCursorPage.getArtists();
+        CursorPage<Artist> page = spotify.getCurrentUserFollowedArtists(authorization, null, null).blockingGet();
         List<Artist> items = page.getItems();
         if (items.size() > 0) {
             Artist followedArtist = items.get(0);

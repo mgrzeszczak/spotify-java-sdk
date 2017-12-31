@@ -12,7 +12,7 @@ import com.github.mgrzeszczak.spotify.sdk.model.PlaylistSimplified;
 import com.github.mgrzeszczak.spotify.sdk.model.PlaylistTrack;
 import com.github.mgrzeszczak.spotify.sdk.model.PlaylistTrackRemovalParameters;
 import com.github.mgrzeszczak.spotify.sdk.model.PlaylistTrackReorderParameters;
-import com.github.mgrzeszczak.spotify.sdk.model.SnapshotIdContainer;
+import com.github.mgrzeszczak.spotify.sdk.model.SnapshotId;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
@@ -29,11 +29,11 @@ import retrofit2.http.Query;
 interface PlaylistService {
 
     @POST("v1/users/{user_id}/playlists/{playlist_id}/tracks")
-    Single<SnapshotIdContainer> addTracksToPlaylist(@Header("Authorization") String authorization,
-                                                    @Path("user_id") String userId,
-                                                    @Path("playlist_id") String playlistId,
-                                                    @Query("uris") String uris,
-                                                    @Query("position") Integer position);
+    Single<SnapshotId> addTracksToPlaylist(@Header("Authorization") String authorization,
+                                           @Path("user_id") String userId,
+                                           @Path("playlist_id") String playlistId,
+                                           @Query("uris") String uris,
+                                           @Query("position") Integer position);
 
     @Headers(CONTENT_TYPE_APPLICATION_JSON)
     @PUT("v1/users/{user_id}/playlists/{playlist_id}")
@@ -84,17 +84,17 @@ interface PlaylistService {
 
     @Headers(CONTENT_TYPE_APPLICATION_JSON)
     @DELETE("v1/users/{user_id}/playlists/{playlist_id}/tracks")
-    Single<SnapshotIdContainer> removeTracksFromPlaylist(@Header("Authorization") String authorization,
-                                                         @Path("user_id") String userId,
-                                                         @Path("playlist_id") String playlistId,
-                                                         @Body PlaylistTrackRemovalParameters parameters);
+    Single<SnapshotId> removeTracksFromPlaylist(@Header("Authorization") String authorization,
+                                                @Path("user_id") String userId,
+                                                @Path("playlist_id") String playlistId,
+                                                @Body PlaylistTrackRemovalParameters parameters);
 
 
     @PUT("v1/users/{user_id}/playlists/{playlist_id}/tracks")
-    Single<SnapshotIdContainer> reorderPlaylistTracks(@Header("Authorization") String authorization,
-                                                      @Path("user_id") String userId,
-                                                      @Path("playlist_id") String playlistId,
-                                                      @Body PlaylistTrackReorderParameters parameters);
+    Single<SnapshotId> reorderPlaylistTracks(@Header("Authorization") String authorization,
+                                             @Path("user_id") String userId,
+                                             @Path("playlist_id") String playlistId,
+                                             @Body PlaylistTrackReorderParameters parameters);
 
     @PUT("v1/users/{user_id}/playlists/{playlist_id}/tracks")
     Completable replacePlaylistTracks(@Header("Authorization") String authorization,

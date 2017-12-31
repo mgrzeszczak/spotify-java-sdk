@@ -3,7 +3,7 @@ package com.github.mgrzeszczak.spotify.sdk.api;
 import com.github.mgrzeszczak.spotify.sdk.model.CurrentPlayback;
 import com.github.mgrzeszczak.spotify.sdk.model.CurrentlyPlaying;
 import com.github.mgrzeszczak.spotify.sdk.model.CursorPage;
-import com.github.mgrzeszczak.spotify.sdk.model.DeviceContainer;
+import com.github.mgrzeszczak.spotify.sdk.model.Devices;
 import com.github.mgrzeszczak.spotify.sdk.model.PlayHistory;
 import com.github.mgrzeszczak.spotify.sdk.model.PlayParameters;
 import com.github.mgrzeszczak.spotify.sdk.model.TransferPlaybackParameters;
@@ -27,7 +27,7 @@ interface PlayerService {
                                                       @Query("before") Long before);
 
     @GET("v1/me/player/devices")
-    Single<Response<DeviceContainer>> getUserAvailableDevices(@Header("Authorization") String authorization);
+    Single<Response<Devices>> getUserAvailableDevices(@Header("Authorization") String authorization);
 
     @GET("v1/me/player/currently-playing")
     Single<Response<CurrentlyPlaying>> getCurrentlyPlaying(@Header("Authorization") String authorization,
