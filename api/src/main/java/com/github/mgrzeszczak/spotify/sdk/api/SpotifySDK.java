@@ -405,13 +405,25 @@ public final class SpotifySDK {
     @RequiredScope({
             Scope.USER_FOLLOW_READ
     })
-    public Single<List<Boolean>> checkIfCurrentUserFollows(@NotNull String authorization,
-                                                           @NotNull String type,
-                                                           @NotNull Collection<String> ids) {
-        requireNonNull(authorization, type, ids);
+    public Single<List<Boolean>> checkIfCurrentUserFollowsArtists(@NotNull String authorization,
+                                                                  @NotNull Collection<String> ids) {
+        requireNonNull(authorization, ids);
         return followService.checkIfCurrentUserFollows(
                 authorization,
-                type,
+                "artist",
+                commaJoin(ids)
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    @RequiredScope({
+            Scope.USER_FOLLOW_READ
+    })
+    public Single<List<Boolean>> checkIfCurrentUserFollowsUsers(@NotNull String authorization,
+                                                                @NotNull Collection<String> ids) {
+        requireNonNull(authorization, ids);
+        return followService.checkIfCurrentUserFollows(
+                authorization,
+                "user",
                 commaJoin(ids)
         ).onErrorResumeNext(apiExceptionConverter::convertSingle);
     }

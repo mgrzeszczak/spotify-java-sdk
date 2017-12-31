@@ -1,5 +1,7 @@
 package com.github.mgrzeszczak.spotify.sdk.api;
 
+import static com.github.mgrzeszczak.spotify.sdk.api.Utils.CONTENT_TYPE_APPLICATION_JSON;
+
 import com.github.mgrzeszczak.spotify.sdk.model.CurrentPlayback;
 import com.github.mgrzeszczak.spotify.sdk.model.CurrentlyPlaying;
 import com.github.mgrzeszczak.spotify.sdk.model.CursorPage;
@@ -82,7 +84,7 @@ interface PlayerService {
                                    @Query("state") boolean state,
                                    @Query("device_id") String device_id);
 
-    @Headers("Content-Type: application/json")
+    @Headers(CONTENT_TYPE_APPLICATION_JSON)
     @PUT("v1/me/player")
     Single<Response<Void>> transferPlayback(@Header("Authorization") String authorization,
                                             @Body TransferPlaybackParameters transferPlaybackParameters);

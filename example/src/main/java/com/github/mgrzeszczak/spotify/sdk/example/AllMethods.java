@@ -13,11 +13,15 @@ import com.github.mgrzeszczak.spotify.sdk.model.Category;
 import com.github.mgrzeszczak.spotify.sdk.model.CurrentPlayback;
 import com.github.mgrzeszczak.spotify.sdk.model.CurrentlyPlaying;
 import com.github.mgrzeszczak.spotify.sdk.model.CursorPage;
+import com.github.mgrzeszczak.spotify.sdk.model.Device;
 import com.github.mgrzeszczak.spotify.sdk.model.Devices;
 import com.github.mgrzeszczak.spotify.sdk.model.FeaturedPlaylists;
 import com.github.mgrzeszczak.spotify.sdk.model.Image;
 import com.github.mgrzeszczak.spotify.sdk.model.OffsetPage;
 import com.github.mgrzeszczak.spotify.sdk.model.PlayHistory;
+import com.github.mgrzeszczak.spotify.sdk.model.PlayParameters;
+import com.github.mgrzeszczak.spotify.sdk.model.Playlist;
+import com.github.mgrzeszczak.spotify.sdk.model.PlaylistParameters;
 import com.github.mgrzeszczak.spotify.sdk.model.PlaylistSimplified;
 import com.github.mgrzeszczak.spotify.sdk.model.PlaylistTrack;
 import com.github.mgrzeszczak.spotify.sdk.model.Recommendations;
@@ -94,11 +98,63 @@ public class AllMethods {
         // 34
 
         // search
-        OffsetPage<AlbumSimplified> albumSearch = spotify.searchAlbums(authorization, "dovydas", null, null, null).blockingGet();
-        OffsetPage<Artist> artistSearch = spotify.searchArtists(authorization, "dovydas", null, null, null).blockingGet();
-        OffsetPage<Track> trackSearch = spotify.searchTracks(authorization, "dovydas", null, null, null).blockingGet();
-        OffsetPage<PlaylistSimplified> playlistSearch = spotify.searchPlaylists(authorization, "dovydas", null, null, null).blockingGet();
+        OffsetPage<AlbumSimplified> albumSearch = spotify.searchAlbums(authorization, "abcd", null, null, null).blockingGet();
+        OffsetPage<Artist> artistSearch = spotify.searchArtists(authorization, "abcd", null, null, null).blockingGet();
+        OffsetPage<Track> trackSearch = spotify.searchTracks(authorization, "abcd", null, null, null).blockingGet();
+        OffsetPage<PlaylistSimplified> playlistSearch = spotify.searchPlaylists(authorization, "abcd", null, null, null).blockingGet();
 
+        Artist firstFollowedArtist = followedArtists.getItems().get(0);
+
+        spotify.unfollowArtists(authorization, Collections.singletonList(firstFollowedArtist.getId())).blockingAwait();
+        spotify.followArtists(authorization, Collections.singletonList(firstFollowedArtist.getId())).blockingAwait();
+        Device device = deviceContainerResponse.body().getDevices().get(0);
+
+        Response<Void> playResponse = spotify.play(authorization, PlayParameters.builder().uris(Collections.singletonList(track2.getUri())).build(), device.getId()).blockingGet();
+
+        /*spotify.addTracksToPlaylist();
+        spotify.updatePlaylistCover();
+        spotify.unfollowUsers();
+        spotify.unfollowPlaylist();
+        spotify.transferPlayback();
+        spotify.shuffle();
+        spotify.setVolume();
+        spotify.setRepeat();
+        spotify.seek();
+        spotify.saveTracks();
+        spotify.saveAlbums();
+        spotify.replacePlaylistTracks();
+        spotify.reorderPlaylistTracks();
+        spotify.removeTracksFromPlaylist();
+        spotify.removeTracks();
+        spotify.removeAlbums();*/
+
+        tokenData = spotify.refreshToken(tokenData.getRefreshToken()).blockingGet();
+        authorization = "Bearer " + tokenData.getAccessToken();
+
+        Playlist newPlaylist = spotify.createPlaylist(
+                authorization,
+                userPrivate.getId(),
+                PlaylistParameters.builder()
+                        .isPublic(true)
+                        .name("custom playlist2")
+                        .collaborative(false)
+                        .build()
+        ).blockingGet();
+        /*spotify.playPreviousTrack();
+        spotify.playNextTrack();
+        spotify.pause();
+        spotify.followUsers();
+        spotify.followPlaylist();
+        spotify.followArtists();*/
+
+        List<Boolean> tracksContain = spotify.checkSavedTracksContain(authorization, Collections.singletonList(track2.getId())).blockingGet();
+        List<Boolean> albumsContain = spotify.checkSavedAlbumsContain(authorization, Collections.singleton(album.getId())).blockingGet();
+        List<Boolean> usersFollowPlaylist = spotify.checkIfUsersFollowPlaylist(authorization, playlist.getOwner().getId(), playlist.getId(), Collections.singleton(userPrivate.getId())).blockingGet();
+        List<Boolean> currentUserFollowsArtists = spotify.checkIfCurrentUserFollowsArtists(authorization, Collections.singletonList(artist.getId())).blockingGet();
+        List<Boolean> currentUserFollowsUsers = spotify.checkIfCurrentUserFollowsUsers(authorization, Collections.singletonList(userPrivate.getId())).blockingGet();
+
+        PlaylistParameters params = PlaylistParameters.builder().name("new name2").description("description").build();
+        spotify.changePlaylistDetails(authorization, newPlaylist.getOwner().getId(), newPlaylist.getId(), params).blockingAwait();
 
         System.out.println(authorization);
         System.out.println("done");

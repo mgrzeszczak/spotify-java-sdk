@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 class Utils {
 
     static final String CONTENT_TYPE_APPLICATION_JSON = "Content-Type: application/json";
+    static final String CONTENT_TYPE_IMAGE_JPEG = "Content-Type: image/jpeg";
 
     private static final SpotifyObjectMapper MAPPER = new SpotifyObjectMapper();
 

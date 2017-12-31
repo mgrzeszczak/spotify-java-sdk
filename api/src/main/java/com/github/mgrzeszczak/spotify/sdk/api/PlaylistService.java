@@ -1,6 +1,7 @@
 package com.github.mgrzeszczak.spotify.sdk.api;
 
 import static com.github.mgrzeszczak.spotify.sdk.api.Utils.CONTENT_TYPE_APPLICATION_JSON;
+import static com.github.mgrzeszczak.spotify.sdk.api.Utils.CONTENT_TYPE_IMAGE_JPEG;
 
 import java.util.List;
 
@@ -102,7 +103,7 @@ interface PlaylistService {
                                       @Path("playlist_id") String playlistId,
                                       @Query("uris") String uris);
 
-    @Headers("Content-Type: image/jpeg")
+    @Headers(CONTENT_TYPE_IMAGE_JPEG)
     @PUT("v1/users/{user_id}/playlists/{playlist_id}/images")
     Completable updatePlaylistCover(@Header("Authorization") String authorization,
                                     @Path("user_id") String userId,
