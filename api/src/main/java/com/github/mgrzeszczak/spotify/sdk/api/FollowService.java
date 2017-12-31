@@ -1,8 +1,11 @@
 package com.github.mgrzeszczak.spotify.sdk.api;
 
+import static com.github.mgrzeszczak.spotify.sdk.api.Utils.CONTENT_TYPE_APPLICATION_JSON;
+
 import java.util.List;
 
-import com.github.mgrzeszczak.spotify.sdk.model.ArtistsCursorPage;
+import com.github.mgrzeszczak.spotify.sdk.model.Artist;
+import com.github.mgrzeszczak.spotify.sdk.model.CursorPage;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
@@ -38,7 +41,7 @@ interface FollowService {
                                      @Query("type") String type,
                                      @Query("ids") String ids);
 
-    @Headers("Content-Type: application/json")
+    @Headers(CONTENT_TYPE_APPLICATION_JSON)
     @PUT("v1/users/{owner_id}/playlists/{playlist_id}/followers")
     Completable followPlaylist(@Header("Authorization") String authorization,
                                @Path("owner_id") String ownerId,
@@ -52,10 +55,10 @@ interface FollowService {
 
 
     @GET("v1/me/following")
-    Single<ArtistsCursorPage> getCurrentUserFollowedArtists(@Header("Authorization") String authorization,
-                                                            @Query("type") String type,
-                                                            @Query("limit") String limit,
-                                                            @Query("after") String after);
+    Single<Wrapper<CursorPage<Artist>>> getCurrentUserFollowedArtists(@Header("Authorization") String authorization,
+                                                                      @Query("type") String type,
+                                                                      @Query("limit") String limit,
+                                                                      @Query("after") String after);
 
 
 }

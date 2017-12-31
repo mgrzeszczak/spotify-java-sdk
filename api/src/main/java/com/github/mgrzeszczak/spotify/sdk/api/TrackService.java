@@ -1,11 +1,10 @@
 package com.github.mgrzeszczak.spotify.sdk.api;
 
+import java.util.List;
 import java.util.Map;
 
 import com.github.mgrzeszczak.spotify.sdk.model.AudioFeatures;
-import com.github.mgrzeszczak.spotify.sdk.model.AudioFeaturesContainer;
 import com.github.mgrzeszczak.spotify.sdk.model.Track;
-import com.github.mgrzeszczak.spotify.sdk.model.TrackContainer;
 
 import io.reactivex.Single;
 import retrofit2.http.GET;
@@ -21,9 +20,9 @@ interface TrackService {
                            @Query("market") String market);
 
     @GET("v1/tracks")
-    Single<TrackContainer> getTracks(@Header("Authorization") String authorization,
-                                     @Query("ids") String trackIds,
-                                     @Query("market") String market);
+    Single<Wrapper<List<Track>>> getTracks(@Header("Authorization") String authorization,
+                                           @Query("ids") String trackIds,
+                                           @Query("market") String market);
 
 
     @GET("v1/audio-features/{id}")
@@ -31,8 +30,8 @@ interface TrackService {
                                                 @Path("id") String trackId);
 
     @GET("v1/audio-features")
-    Single<AudioFeaturesContainer> getTracksAudioFeatures(@Header("Authorization") String authorization,
-                                                          @Path("ids") String trackIds);
+    Single<Wrapper<List<AudioFeatures>>> getTracksAudioFeatures(@Header("Authorization") String authorization,
+                                                                @Query("ids") String trackIds);
 
     @GET("v1/audio-analysis/{id}")
     Single<Map<String, Object>> getTrackAudioAnalysis(@Header("Authorization") String authorization,

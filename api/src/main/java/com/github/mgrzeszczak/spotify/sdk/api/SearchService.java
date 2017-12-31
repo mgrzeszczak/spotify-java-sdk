@@ -14,35 +14,35 @@ import retrofit2.http.Query;
 interface SearchService {
 
     @GET("v1/search")
-    Single<OffsetPage<Artist>> searchArtists(@Header("Authorization") String authorization,
-                                             @Query("q") String query,
-                                             @Query("type") String type,
-                                             @Query("market") String market,
-                                             @Query("limit") Integer limit,
-                                             @Query("offset") Integer offset);
+    Single<Wrapper<OffsetPage<Artist>>> searchArtists(@Header("Authorization") String authorization,
+                                                      @Query("q") String query,
+                                                      @Query("type") String type,
+                                                      @Query("market") String market,
+                                                      @Query("limit") Integer limit,
+                                                      @Query("offset") Integer offset);
 
     @GET("v1/search")
-    Single<OffsetPage<AlbumSimplified>> searchAlbums(@Header("Authorization") String authorization,
-                                                     @Query("q") String query,
-                                                     @Query("type") String type,
-                                                     @Query("market") String market,
-                                                     @Query("limit") Integer limit,
-                                                     @Query("offset") Integer offset);
+    Single<Wrapper<OffsetPage<AlbumSimplified>>> searchAlbums(@Header("Authorization") String authorization,
+                                                              @Query("q") String query,
+                                                              @Query("type") String type,
+                                                              @Query("market") String market,
+                                                              @Query("limit") Integer limit,
+                                                              @Query("offset") Integer offset);
 
     @GET("v1/search")
-    Single<OffsetPage<Track>> searchTracks(@Header("Authorization") String authorization,
-                                           @Query("q") String query,
-                                           @Query("type") String type,
-                                           @Query("market") String market,
-                                           @Query("limit") Integer limit,
-                                           @Query("offset") Integer offset);
+    Single<Wrapper<OffsetPage<Track>>> searchTracks(@Header("Authorization") String authorization,
+                                                    @Query("q") String query,
+                                                    @Query("type") String type,
+                                                    @Query("market") String market,
+                                                    @Query("limit") Integer limit,
+                                                    @Query("offset") Integer offset);
 
     @GET("v1/search")
-    Single<OffsetPage<PlaylistSimplified>> searchPlaylists(@Header("Authorization") String authorization,
-                                                           @Query("q") String query,
-                                                           @Query("type") String type,
-                                                           @Query("market") String market,
-                                                           @Query("limit") Integer limit,
-                                                           @Query("offset") Integer offset);
+    Single<Wrapper<OffsetPage<PlaylistSimplified>>> searchPlaylists(@Header("Authorization") String authorization,
+                                                                    @Query("q") String query,
+                                                                    @Query("type") String type,
+                                                                    @Query("market") String market,
+                                                                    @Query("limit") Integer limit,
+                                                                    @Query("offset") Integer offset);
 
 }

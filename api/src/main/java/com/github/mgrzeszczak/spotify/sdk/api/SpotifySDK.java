@@ -16,19 +16,16 @@ import org.jetbrains.annotations.Nullable;
 import com.github.mgrzeszczak.spotify.sdk.api.annotation.Beta;
 import com.github.mgrzeszczak.spotify.sdk.api.annotation.RequiredScope;
 import com.github.mgrzeszczak.spotify.sdk.model.Album;
-import com.github.mgrzeszczak.spotify.sdk.model.AlbumContainer;
 import com.github.mgrzeszczak.spotify.sdk.model.AlbumSimplified;
 import com.github.mgrzeszczak.spotify.sdk.model.Artist;
-import com.github.mgrzeszczak.spotify.sdk.model.ArtistContainer;
-import com.github.mgrzeszczak.spotify.sdk.model.ArtistsCursorPage;
 import com.github.mgrzeszczak.spotify.sdk.model.AudioFeatures;
-import com.github.mgrzeszczak.spotify.sdk.model.AudioFeaturesContainer;
 import com.github.mgrzeszczak.spotify.sdk.model.Category;
 import com.github.mgrzeszczak.spotify.sdk.model.CurrentPlayback;
 import com.github.mgrzeszczak.spotify.sdk.model.CurrentlyPlaying;
 import com.github.mgrzeszczak.spotify.sdk.model.CursorPage;
-import com.github.mgrzeszczak.spotify.sdk.model.DeviceContainer;
+import com.github.mgrzeszczak.spotify.sdk.model.Devices;
 import com.github.mgrzeszczak.spotify.sdk.model.ErrorHolder;
+import com.github.mgrzeszczak.spotify.sdk.model.FeaturedPlaylists;
 import com.github.mgrzeszczak.spotify.sdk.model.Image;
 import com.github.mgrzeszczak.spotify.sdk.model.OffsetPage;
 import com.github.mgrzeszczak.spotify.sdk.model.PlayHistory;
@@ -42,10 +39,9 @@ import com.github.mgrzeszczak.spotify.sdk.model.PlaylistTrackReorderParameters;
 import com.github.mgrzeszczak.spotify.sdk.model.Recommendations;
 import com.github.mgrzeszczak.spotify.sdk.model.SavedAlbum;
 import com.github.mgrzeszczak.spotify.sdk.model.SavedTrack;
-import com.github.mgrzeszczak.spotify.sdk.model.SnapshotIdContainer;
+import com.github.mgrzeszczak.spotify.sdk.model.SnapshotId;
 import com.github.mgrzeszczak.spotify.sdk.model.Track;
 import com.github.mgrzeszczak.spotify.sdk.model.TrackAttributes;
-import com.github.mgrzeszczak.spotify.sdk.model.TrackContainer;
 import com.github.mgrzeszczak.spotify.sdk.model.TransferPlaybackParameters;
 import com.github.mgrzeszczak.spotify.sdk.model.UserPrivate;
 import com.github.mgrzeszczak.spotify.sdk.model.UserPublic;
@@ -54,6 +50,7 @@ import com.github.mgrzeszczak.spotify.sdk.model.authorization.Scope;
 import com.github.mgrzeszczak.spotify.sdk.model.authorization.TokenData;
 
 import io.reactivex.Completable;
+import io.reactivex.Flowable;
 import io.reactivex.Scheduler;
 import io.reactivex.Single;
 import lombok.AccessLevel;
@@ -65,7 +62,6 @@ import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
-@SuppressWarnings("unused")
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public final class SpotifySDK {
 
@@ -126,12 +122,13 @@ public final class SpotifySDK {
     }
 
     @RequiredScope({})
-    public Single<AlbumContainer> getAlbums(@NotNull String authorization,
-                                            @NotNull Collection<String> albumIds,
-                                            @Nullable String market) {
+    public Flowable<Album> getAlbums(@NotNull String authorization,
+                                     @NotNull Collection<String> albumIds,
+                                     @Nullable String market) {
         requireNonNull(authorization, albumIds);
         return albumService.getAlbums(authorization, commaJoin(albumIds), market)
-                .onErrorResumeNext(apiExceptionConverter::convertSingle);
+                .onErrorResumeNext(apiExceptionConverter::convertSingle)
+                .flattenAsFlowable(Wrapper::getData);
     }
 
     @RequiredScope({})
@@ -161,30 +158,33 @@ public final class SpotifySDK {
     }
 
     @RequiredScope({})
-    public Single<ArtistContainer> getArtists(@NotNull String authorization,
-                                              @NotNull Collection<String> artistIds) {
+    public Flowable<Artist> getArtists(@NotNull String authorization,
+                                       @NotNull Collection<String> artistIds) {
         requireNonNull(authorization, artistIds);
         return artistService.getArtists(
                 authorization,
                 commaJoin(artistIds)
-        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle)
+                .flattenAsFlowable(Wrapper::getData);
     }
 
     @RequiredScope({})
-    public Single<ArtistContainer> getRelatedArtists(@NotNull String authorization,
-                                                     @NotNull String artistId) {
+    public Flowable<Artist> getRelatedArtists(@NotNull String authorization,
+                                              @NotNull String artistId) {
         requireNonNull(authorization, artistId);
         return artistService.getRelatedArtists(authorization, artistId)
-                .onErrorResumeNext(apiExceptionConverter::convertSingle);
+                .onErrorResumeNext(apiExceptionConverter::convertSingle)
+                .flattenAsFlowable(Wrapper::getData);
     }
 
     @RequiredScope({})
-    public Single<TrackContainer> getArtistTopTracks(@NotNull String authorization,
-                                                     @NotNull String artistId,
-                                                     @NotNull String country) {
+    public Flowable<Track> getArtistTopTracks(@NotNull String authorization,
+                                              @NotNull String artistId,
+                                              @NotNull String country) {
         requireNonNull(authorization, artistId, country);
         return artistService.getArtistTopTracks(authorization, artistId, country)
-                .onErrorResumeNext(apiExceptionConverter::convertSingle);
+                .onErrorResumeNext(apiExceptionConverter::convertSingle)
+                .flattenAsFlowable(Wrapper::getData);
     }
 
     @RequiredScope({})
@@ -232,7 +232,8 @@ public final class SpotifySDK {
                 country,
                 limit,
                 offset
-        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle)
+                .map(Wrapper::getData);
     }
 
     @RequiredScope({})
@@ -248,16 +249,17 @@ public final class SpotifySDK {
                 country,
                 limit,
                 offset
-        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle)
+                .map(Wrapper::getData);
     }
 
     @RequiredScope({})
-    public Single<OffsetPage<PlaylistSimplified>> getFeaturedPlaylists(@NotNull String authorization,
-                                                                       @Nullable String locale,
-                                                                       @Nullable String country,
-                                                                       @Nullable String timestamp,
-                                                                       @Nullable Integer limit,
-                                                                       @Nullable Integer offset) {
+    public Single<FeaturedPlaylists> getFeaturedPlaylists(@NotNull String authorization,
+                                                          @Nullable String locale,
+                                                          @Nullable String country,
+                                                          @Nullable String timestamp,
+                                                          @Nullable Integer limit,
+                                                          @Nullable Integer offset) {
         requireNonNull(authorization);
         return browseService.getFeaturedPlaylists(
                 authorization,
@@ -270,17 +272,18 @@ public final class SpotifySDK {
     }
 
     @RequiredScope({})
-    public Single<OffsetPage<AlbumSimplified>> getNewReleases(@NotNull String authorization,
-                                                              @Nullable String country,
-                                                              @Nullable Integer limit,
-                                                              @Nullable Integer offset) {
+    public Single<OffsetPage<Album>> getNewReleases(@NotNull String authorization,
+                                                    @Nullable String country,
+                                                    @Nullable Integer limit,
+                                                    @Nullable Integer offset) {
         requireNonNull(authorization);
         return browseService.getNewReleases(
                 authorization,
                 country,
                 limit,
                 offset
-        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle)
+                .map(Wrapper::getData);
     }
 
     @RequiredScope({})
@@ -321,7 +324,8 @@ public final class SpotifySDK {
                 market,
                 limit,
                 offset
-        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle)
+                .map(Wrapper::getData);
     }
 
     @RequiredScope({})
@@ -338,7 +342,8 @@ public final class SpotifySDK {
                 market,
                 limit,
                 offset
-        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle)
+                .map(Wrapper::getData);
     }
 
     @RequiredScope({})
@@ -355,7 +360,8 @@ public final class SpotifySDK {
                 market,
                 limit,
                 offset
-        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle)
+                .map(Wrapper::getData);
     }
 
     @RequiredScope({})
@@ -372,7 +378,8 @@ public final class SpotifySDK {
                 market,
                 limit,
                 offset
-        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle)
+                .map(Wrapper::getData);
     }
 
     @RequiredScope({
@@ -397,13 +404,25 @@ public final class SpotifySDK {
     @RequiredScope({
             Scope.USER_FOLLOW_READ
     })
-    public Single<List<Boolean>> checkIfCurrentUserFollows(@NotNull String authorization,
-                                                           @NotNull String type,
-                                                           @NotNull Collection<String> ids) {
-        requireNonNull(authorization, type, ids);
+    public Single<List<Boolean>> checkIfCurrentUserFollowsArtists(@NotNull String authorization,
+                                                                  @NotNull Collection<String> ids) {
+        requireNonNull(authorization, ids);
         return followService.checkIfCurrentUserFollows(
                 authorization,
-                type,
+                "artist",
+                commaJoin(ids)
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+    }
+
+    @RequiredScope({
+            Scope.USER_FOLLOW_READ
+    })
+    public Single<List<Boolean>> checkIfCurrentUserFollowsUsers(@NotNull String authorization,
+                                                                @NotNull Collection<String> ids) {
+        requireNonNull(authorization, ids);
+        return followService.checkIfCurrentUserFollows(
+                authorization,
+                "user",
                 commaJoin(ids)
         ).onErrorResumeNext(apiExceptionConverter::convertSingle);
     }
@@ -509,16 +528,17 @@ public final class SpotifySDK {
     @RequiredScope({
             Scope.USER_FOLLOW_READ
     })
-    public Single<ArtistsCursorPage> getCurrentUserFollowedArtists(@NotNull String authorization,
-                                                                   @Nullable String limit,
-                                                                   @Nullable String after) {
+    public Single<CursorPage<Artist>> getCurrentUserFollowedArtists(@NotNull String authorization,
+                                                                    @Nullable String limit,
+                                                                    @Nullable String after) {
         requireNonNull(authorization);
         return followService.getCurrentUserFollowedArtists(
                 authorization,
                 "artist",
                 limit,
                 after
-        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle)
+                .map(Wrapper::getData);
     }
 
     @RequiredScope({
@@ -568,15 +588,16 @@ public final class SpotifySDK {
     }
 
     @RequiredScope({})
-    public Single<TrackContainer> getTracks(@NotNull String authorization,
-                                            @NotNull Collection<String> trackIds,
-                                            @Nullable String market) {
+    public Flowable<Track> getTracks(@NotNull String authorization,
+                                     @NotNull Collection<String> trackIds,
+                                     @Nullable String market) {
         requireNonNull(authorization, trackIds);
         return trackService.getTracks(
                 authorization,
                 commaJoin(trackIds),
                 market
-        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle)
+                .flattenAsFlowable(Wrapper::getData);
     }
 
     @RequiredScope({})
@@ -590,13 +611,14 @@ public final class SpotifySDK {
     }
 
     @RequiredScope({})
-    public Single<AudioFeaturesContainer> getTracksAudioFeatures(@NotNull String authorization,
-                                                                 @NotNull Collection<String> trackIds) {
+    public Flowable<AudioFeatures> getTracksAudioFeatures(@NotNull String authorization,
+                                                          @NotNull Collection<String> trackIds) {
         requireNonNull(authorization, trackIds);
         return trackService.getTracksAudioFeatures(
                 authorization,
                 commaJoin(trackIds)
-        ).onErrorResumeNext(apiExceptionConverter::convertSingle);
+        ).onErrorResumeNext(apiExceptionConverter::convertSingle)
+                .flattenAsFlowable(Wrapper::getData);
     }
 
     @RequiredScope({})
@@ -630,7 +652,7 @@ public final class SpotifySDK {
     @RequiredScope({
             Scope.USER_READ_PLAYBACK_STATE
     })
-    public Single<Response<DeviceContainer>> getCurrentUserAvailableDevices(@NotNull String authorization) {
+    public Single<Response<Devices>> getCurrentUserAvailableDevices(@NotNull String authorization) {
         requireNonNull(authorization);
         return playerService.getUserAvailableDevices(
                 authorization
@@ -795,11 +817,11 @@ public final class SpotifySDK {
             Scope.PLAYLIST_MODIFY_PRIVATE,
             Scope.PLAYLIST_MODIFY_PUBLIC
     })
-    public Single<SnapshotIdContainer> addTracksToPlaylist(@NotNull String authorization,
-                                                           @NotNull String userId,
-                                                           @NotNull String playlistId,
-                                                           @NotNull Collection<String> trackUris,
-                                                           @Nullable Integer position) {
+    public Single<SnapshotId> addTracksToPlaylist(@NotNull String authorization,
+                                                  @NotNull String userId,
+                                                  @NotNull String playlistId,
+                                                  @NotNull Collection<String> trackUris,
+                                                  @Nullable Integer position) {
         requireNonNull(authorization, userId, playlistId, trackUris);
         return playlistService.addTracksToPlaylist(
                 authorization,
@@ -926,10 +948,10 @@ public final class SpotifySDK {
             Scope.PLAYLIST_MODIFY_PRIVATE,
             Scope.PLAYLIST_MODIFY_PUBLIC
     })
-    public Single<SnapshotIdContainer> removeTracksFromPlaylist(@NotNull String authorization,
-                                                                @NotNull String userId,
-                                                                @NotNull String playlistId,
-                                                                @NotNull PlaylistTrackRemovalParameters parameters) {
+    public Single<SnapshotId> removeTracksFromPlaylist(@NotNull String authorization,
+                                                       @NotNull String userId,
+                                                       @NotNull String playlistId,
+                                                       @NotNull PlaylistTrackRemovalParameters parameters) {
         requireNonNull(authorization, userId, playlistId, parameters);
         return playlistService.removeTracksFromPlaylist(
                 authorization,
@@ -943,10 +965,10 @@ public final class SpotifySDK {
             Scope.PLAYLIST_MODIFY_PRIVATE,
             Scope.PLAYLIST_MODIFY_PUBLIC
     })
-    public Single<SnapshotIdContainer> reorderPlaylistTracks(@NotNull String authorization,
-                                                             @NotNull String userId,
-                                                             @NotNull String playlistId,
-                                                             @NotNull PlaylistTrackReorderParameters parameters) {
+    public Single<SnapshotId> reorderPlaylistTracks(@NotNull String authorization,
+                                                    @NotNull String userId,
+                                                    @NotNull String playlistId,
+                                                    @NotNull PlaylistTrackReorderParameters parameters) {
         requireNonNull(authorization, userId, playlistId, parameters);
         return playlistService.reorderPlaylistTracks(
                 authorization,

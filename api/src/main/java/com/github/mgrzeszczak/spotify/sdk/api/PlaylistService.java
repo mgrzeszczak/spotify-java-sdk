@@ -1,6 +1,7 @@
 package com.github.mgrzeszczak.spotify.sdk.api;
 
 import static com.github.mgrzeszczak.spotify.sdk.api.Utils.CONTENT_TYPE_APPLICATION_JSON;
+import static com.github.mgrzeszczak.spotify.sdk.api.Utils.CONTENT_TYPE_IMAGE_JPEG;
 
 import java.util.List;
 
@@ -12,7 +13,7 @@ import com.github.mgrzeszczak.spotify.sdk.model.PlaylistSimplified;
 import com.github.mgrzeszczak.spotify.sdk.model.PlaylistTrack;
 import com.github.mgrzeszczak.spotify.sdk.model.PlaylistTrackRemovalParameters;
 import com.github.mgrzeszczak.spotify.sdk.model.PlaylistTrackReorderParameters;
-import com.github.mgrzeszczak.spotify.sdk.model.SnapshotIdContainer;
+import com.github.mgrzeszczak.spotify.sdk.model.SnapshotId;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
@@ -29,11 +30,11 @@ import retrofit2.http.Query;
 interface PlaylistService {
 
     @POST("v1/users/{user_id}/playlists/{playlist_id}/tracks")
-    Single<SnapshotIdContainer> addTracksToPlaylist(@Header("Authorization") String authorization,
-                                                    @Path("user_id") String userId,
-                                                    @Path("playlist_id") String playlistId,
-                                                    @Query("uris") String uris,
-                                                    @Query("position") Integer position);
+    Single<SnapshotId> addTracksToPlaylist(@Header("Authorization") String authorization,
+                                           @Path("user_id") String userId,
+                                           @Path("playlist_id") String playlistId,
+                                           @Query("uris") String uris,
+                                           @Query("position") Integer position);
 
     @Headers(CONTENT_TYPE_APPLICATION_JSON)
     @PUT("v1/users/{user_id}/playlists/{playlist_id}")
@@ -84,17 +85,17 @@ interface PlaylistService {
 
     @Headers(CONTENT_TYPE_APPLICATION_JSON)
     @DELETE("v1/users/{user_id}/playlists/{playlist_id}/tracks")
-    Single<SnapshotIdContainer> removeTracksFromPlaylist(@Header("Authorization") String authorization,
-                                                         @Path("user_id") String userId,
-                                                         @Path("playlist_id") String playlistId,
-                                                         @Body PlaylistTrackRemovalParameters parameters);
+    Single<SnapshotId> removeTracksFromPlaylist(@Header("Authorization") String authorization,
+                                                @Path("user_id") String userId,
+                                                @Path("playlist_id") String playlistId,
+                                                @Body PlaylistTrackRemovalParameters parameters);
 
 
     @PUT("v1/users/{user_id}/playlists/{playlist_id}/tracks")
-    Single<SnapshotIdContainer> reorderPlaylistTracks(@Header("Authorization") String authorization,
-                                                      @Path("user_id") String userId,
-                                                      @Path("playlist_id") String playlistId,
-                                                      @Body PlaylistTrackReorderParameters parameters);
+    Single<SnapshotId> reorderPlaylistTracks(@Header("Authorization") String authorization,
+                                             @Path("user_id") String userId,
+                                             @Path("playlist_id") String playlistId,
+                                             @Body PlaylistTrackReorderParameters parameters);
 
     @PUT("v1/users/{user_id}/playlists/{playlist_id}/tracks")
     Completable replacePlaylistTracks(@Header("Authorization") String authorization,
@@ -102,7 +103,7 @@ interface PlaylistService {
                                       @Path("playlist_id") String playlistId,
                                       @Query("uris") String uris);
 
-    @Headers("Content-Type: image/jpeg")
+    @Headers(CONTENT_TYPE_IMAGE_JPEG)
     @PUT("v1/users/{user_id}/playlists/{playlist_id}/images")
     Completable updatePlaylistCover(@Header("Authorization") String authorization,
                                     @Path("user_id") String userId,

@@ -31,7 +31,7 @@ public class PlaylistSimplified {
 
     private String snapshotId;
 
-    private List<Track> tracks;
+    private Tracks tracks;
 
     private String type;
 
