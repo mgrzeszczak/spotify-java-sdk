@@ -2,10 +2,11 @@ package com.github.mgrzeszczak.spotify.sdk.api;
 
 import java.util.Map;
 
-import com.github.mgrzeszczak.spotify.sdk.model.AlbumSimplified;
+import com.github.mgrzeszczak.spotify.sdk.model.AlbumPageContainer;
+import com.github.mgrzeszczak.spotify.sdk.model.Categories;
 import com.github.mgrzeszczak.spotify.sdk.model.Category;
-import com.github.mgrzeszczak.spotify.sdk.model.OffsetPage;
-import com.github.mgrzeszczak.spotify.sdk.model.PlaylistSimplified;
+import com.github.mgrzeszczak.spotify.sdk.model.FeaturedPlaylists;
+import com.github.mgrzeszczak.spotify.sdk.model.PlaylistsPageContainer;
 import com.github.mgrzeszczak.spotify.sdk.model.Recommendations;
 
 import io.reactivex.Single;
@@ -24,34 +25,34 @@ interface BrowseService {
                                  @Query("locale") String locale);
 
     @GET("v1/browse/categories/{category_id}/playlists")
-    Single<OffsetPage<PlaylistSimplified>> getCategoryPlaylists(@Header("Authorization") String authorization,
-                                                                @Path("category_id") String categoryId,
-                                                                @Query("country") String country,
-                                                                @Query("limit") Integer limit,
-                                                                @Query("offset") Integer offset);
+    Single<PlaylistsPageContainer> getCategoryPlaylists(@Header("Authorization") String authorization,
+                                                        @Path("category_id") String categoryId,
+                                                        @Query("country") String country,
+                                                        @Query("limit") Integer limit,
+                                                        @Query("offset") Integer offset);
 
 
     @GET("v1/browse/categories")
-    Single<OffsetPage<Category>> getCategories(@Header("Authorization") String authorization,
-                                               @Query("locale") String locale,
-                                               @Query("country") String country,
-                                               @Query("limit") Integer limit,
-                                               @Query("offset") Integer offset);
+    Single<Categories> getCategories(@Header("Authorization") String authorization,
+                                     @Query("locale") String locale,
+                                     @Query("country") String country,
+                                     @Query("limit") Integer limit,
+                                     @Query("offset") Integer offset);
 
 
     @GET("v1/browse/featured-playlists")
-    Single<OffsetPage<PlaylistSimplified>> getFeaturedPlaylists(@Header("Authorization") String authorization,
-                                                                @Query("locale") String locale,
-                                                                @Query("country") String country,
-                                                                @Query("timestamp") String timestamp,
-                                                                @Query("limit") Integer limit,
-                                                                @Query("offset") Integer offset);
+    Single<FeaturedPlaylists> getFeaturedPlaylists(@Header("Authorization") String authorization,
+                                                   @Query("locale") String locale,
+                                                   @Query("country") String country,
+                                                   @Query("timestamp") String timestamp,
+                                                   @Query("limit") Integer limit,
+                                                   @Query("offset") Integer offset);
 
     @GET("v1/browse/new-releases")
-    Single<OffsetPage<AlbumSimplified>> getNewReleases(@Header("Authorization") String authorization,
-                                                       @Query("country") String country,
-                                                       @Query("limit") Integer limit,
-                                                       @Query("offset") Integer offset);
+    Single<AlbumPageContainer> getNewReleases(@Header("Authorization") String authorization,
+                                              @Query("country") String country,
+                                              @Query("limit") Integer limit,
+                                              @Query("offset") Integer offset);
 
     @GET("v1/recommendations")
     Single<Recommendations> getRecommendations(@Header("Authorization") String authorization,

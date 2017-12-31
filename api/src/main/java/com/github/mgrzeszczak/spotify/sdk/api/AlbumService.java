@@ -23,9 +23,9 @@ interface AlbumService {
                                      @Query("ids") String ids,
                                      @Query("market") String market);
 
-    @GET("albums/{id}/tracks")
+    @GET("v1/albums/{id}/tracks")
     Single<OffsetPage<Track>> getAlbumTracks(@Header("Authorization") String authorization,
-                                             @Query("id") String ids,
+                                             @Path("id") String ids,
                                              @Query("limit") Integer limit,
                                              @Query("offset") Integer offset,
                                              @Query("market") String market);

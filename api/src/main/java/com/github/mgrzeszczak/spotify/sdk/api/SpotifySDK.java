@@ -17,18 +17,22 @@ import com.github.mgrzeszczak.spotify.sdk.api.annotation.Beta;
 import com.github.mgrzeszczak.spotify.sdk.api.annotation.RequiredScope;
 import com.github.mgrzeszczak.spotify.sdk.model.Album;
 import com.github.mgrzeszczak.spotify.sdk.model.AlbumContainer;
-import com.github.mgrzeszczak.spotify.sdk.model.AlbumSimplified;
+import com.github.mgrzeszczak.spotify.sdk.model.AlbumPageContainer;
+import com.github.mgrzeszczak.spotify.sdk.model.AlbumSimplifiedPageContainer;
 import com.github.mgrzeszczak.spotify.sdk.model.Artist;
 import com.github.mgrzeszczak.spotify.sdk.model.ArtistContainer;
+import com.github.mgrzeszczak.spotify.sdk.model.ArtistPageContainer;
 import com.github.mgrzeszczak.spotify.sdk.model.ArtistsCursorPage;
 import com.github.mgrzeszczak.spotify.sdk.model.AudioFeatures;
 import com.github.mgrzeszczak.spotify.sdk.model.AudioFeaturesContainer;
+import com.github.mgrzeszczak.spotify.sdk.model.Categories;
 import com.github.mgrzeszczak.spotify.sdk.model.Category;
 import com.github.mgrzeszczak.spotify.sdk.model.CurrentPlayback;
 import com.github.mgrzeszczak.spotify.sdk.model.CurrentlyPlaying;
 import com.github.mgrzeszczak.spotify.sdk.model.CursorPage;
 import com.github.mgrzeszczak.spotify.sdk.model.DeviceContainer;
 import com.github.mgrzeszczak.spotify.sdk.model.ErrorHolder;
+import com.github.mgrzeszczak.spotify.sdk.model.FeaturedPlaylists;
 import com.github.mgrzeszczak.spotify.sdk.model.Image;
 import com.github.mgrzeszczak.spotify.sdk.model.OffsetPage;
 import com.github.mgrzeszczak.spotify.sdk.model.PlayHistory;
@@ -39,6 +43,7 @@ import com.github.mgrzeszczak.spotify.sdk.model.PlaylistSimplified;
 import com.github.mgrzeszczak.spotify.sdk.model.PlaylistTrack;
 import com.github.mgrzeszczak.spotify.sdk.model.PlaylistTrackRemovalParameters;
 import com.github.mgrzeszczak.spotify.sdk.model.PlaylistTrackReorderParameters;
+import com.github.mgrzeszczak.spotify.sdk.model.PlaylistsPageContainer;
 import com.github.mgrzeszczak.spotify.sdk.model.Recommendations;
 import com.github.mgrzeszczak.spotify.sdk.model.SavedAlbum;
 import com.github.mgrzeszczak.spotify.sdk.model.SavedTrack;
@@ -46,6 +51,7 @@ import com.github.mgrzeszczak.spotify.sdk.model.SnapshotIdContainer;
 import com.github.mgrzeszczak.spotify.sdk.model.Track;
 import com.github.mgrzeszczak.spotify.sdk.model.TrackAttributes;
 import com.github.mgrzeszczak.spotify.sdk.model.TrackContainer;
+import com.github.mgrzeszczak.spotify.sdk.model.TracksPageContainer;
 import com.github.mgrzeszczak.spotify.sdk.model.TransferPlaybackParameters;
 import com.github.mgrzeszczak.spotify.sdk.model.UserPrivate;
 import com.github.mgrzeszczak.spotify.sdk.model.UserPublic;
@@ -65,7 +71,7 @@ import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
-@SuppressWarnings("unused")
+//@SuppressWarnings("unused")
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public final class SpotifySDK {
 
@@ -220,11 +226,11 @@ public final class SpotifySDK {
     }
 
     @RequiredScope({})
-    public Single<OffsetPage<PlaylistSimplified>> getCategoryPlaylists(@NotNull String authorization,
-                                                                       @NotNull String categoryId,
-                                                                       @Nullable String country,
-                                                                       @Nullable Integer limit,
-                                                                       @Nullable Integer offset) {
+    public Single<PlaylistsPageContainer> getCategoryPlaylists(@NotNull String authorization,
+                                                               @NotNull String categoryId,
+                                                               @Nullable String country,
+                                                               @Nullable Integer limit,
+                                                               @Nullable Integer offset) {
         requireNonNull(authorization, categoryId);
         return browseService.getCategoryPlaylists(
                 authorization,
@@ -236,11 +242,11 @@ public final class SpotifySDK {
     }
 
     @RequiredScope({})
-    public Single<OffsetPage<Category>> getCategories(@NotNull String authorization,
-                                                      @Nullable String locale,
-                                                      @Nullable String country,
-                                                      @Nullable Integer limit,
-                                                      @Nullable Integer offset) {
+    public Single<Categories> getCategories(@NotNull String authorization,
+                                            @Nullable String locale,
+                                            @Nullable String country,
+                                            @Nullable Integer limit,
+                                            @Nullable Integer offset) {
         requireNonNull(authorization);
         return browseService.getCategories(
                 authorization,
@@ -252,12 +258,12 @@ public final class SpotifySDK {
     }
 
     @RequiredScope({})
-    public Single<OffsetPage<PlaylistSimplified>> getFeaturedPlaylists(@NotNull String authorization,
-                                                                       @Nullable String locale,
-                                                                       @Nullable String country,
-                                                                       @Nullable String timestamp,
-                                                                       @Nullable Integer limit,
-                                                                       @Nullable Integer offset) {
+    public Single<FeaturedPlaylists> getFeaturedPlaylists(@NotNull String authorization,
+                                                          @Nullable String locale,
+                                                          @Nullable String country,
+                                                          @Nullable String timestamp,
+                                                          @Nullable Integer limit,
+                                                          @Nullable Integer offset) {
         requireNonNull(authorization);
         return browseService.getFeaturedPlaylists(
                 authorization,
@@ -270,10 +276,10 @@ public final class SpotifySDK {
     }
 
     @RequiredScope({})
-    public Single<OffsetPage<AlbumSimplified>> getNewReleases(@NotNull String authorization,
-                                                              @Nullable String country,
-                                                              @Nullable Integer limit,
-                                                              @Nullable Integer offset) {
+    public Single<AlbumPageContainer> getNewReleases(@NotNull String authorization,
+                                                     @Nullable String country,
+                                                     @Nullable Integer limit,
+                                                     @Nullable Integer offset) {
         requireNonNull(authorization);
         return browseService.getNewReleases(
                 authorization,
@@ -308,11 +314,11 @@ public final class SpotifySDK {
     }
 
     @RequiredScope({})
-    public Single<OffsetPage<Artist>> searchArtists(@NotNull String authorization,
-                                                    @NotNull String query,
-                                                    @Nullable String market,
-                                                    @Nullable Integer limit,
-                                                    @Nullable Integer offset) {
+    public Single<ArtistPageContainer> searchArtists(@NotNull String authorization,
+                                                     @NotNull String query,
+                                                     @Nullable String market,
+                                                     @Nullable Integer limit,
+                                                     @Nullable Integer offset) {
         requireNonNull(authorization, query);
         return searchService.searchArtists(
                 authorization,
@@ -325,11 +331,11 @@ public final class SpotifySDK {
     }
 
     @RequiredScope({})
-    public Single<OffsetPage<AlbumSimplified>> searchAlbums(@NotNull String authorization,
-                                                            @NotNull String query,
-                                                            @Nullable String market,
-                                                            @Nullable Integer limit,
-                                                            @Nullable Integer offset) {
+    public Single<AlbumSimplifiedPageContainer> searchAlbums(@NotNull String authorization,
+                                                             @NotNull String query,
+                                                             @Nullable String market,
+                                                             @Nullable Integer limit,
+                                                             @Nullable Integer offset) {
         requireNonNull(authorization, query);
         return searchService.searchAlbums(
                 authorization,
@@ -342,11 +348,11 @@ public final class SpotifySDK {
     }
 
     @RequiredScope({})
-    public Single<OffsetPage<Track>> searchTracks(@NotNull String authorization,
-                                                  @NotNull String query,
-                                                  @Nullable String market,
-                                                  @Nullable Integer limit,
-                                                  @Nullable Integer offset) {
+    public Single<TracksPageContainer> searchTracks(@NotNull String authorization,
+                                                    @NotNull String query,
+                                                    @Nullable String market,
+                                                    @Nullable Integer limit,
+                                                    @Nullable Integer offset) {
         requireNonNull(authorization, query);
         return searchService.searchTracks(
                 authorization,
@@ -359,11 +365,11 @@ public final class SpotifySDK {
     }
 
     @RequiredScope({})
-    public Single<OffsetPage<PlaylistSimplified>> searchPlaylists(@NotNull String authorization,
-                                                                  @NotNull String query,
-                                                                  @Nullable String market,
-                                                                  @Nullable Integer limit,
-                                                                  @Nullable Integer offset) {
+    public Single<PlaylistsPageContainer> searchPlaylists(@NotNull String authorization,
+                                                          @NotNull String query,
+                                                          @Nullable String market,
+                                                          @Nullable Integer limit,
+                                                          @Nullable Integer offset) {
         requireNonNull(authorization, query);
         return searchService.searchPlaylists(
                 authorization,

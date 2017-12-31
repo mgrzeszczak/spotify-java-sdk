@@ -32,7 +32,7 @@ interface TrackService {
 
     @GET("v1/audio-features")
     Single<AudioFeaturesContainer> getTracksAudioFeatures(@Header("Authorization") String authorization,
-                                                          @Path("ids") String trackIds);
+                                                          @Query("ids") String trackIds);
 
     @GET("v1/audio-analysis/{id}")
     Single<Map<String, Object>> getTrackAudioAnalysis(@Header("Authorization") String authorization,
