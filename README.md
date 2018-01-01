@@ -22,8 +22,8 @@ __IN DEVELOPMENT, BREAKING CHANGES WILL BE HAPPENING__
 2. Add dependencies on `api` and `model` projects
     ```
     dependencies {
-        compile 'com.github.mgrzeszczak:spotify-java-sdk:api:${VERSION}'
-        compile 'com.github.mgrzeszczak:spotify-java-sdk:model:${VERSION}'
+        compile 'com.github.mgrzeszczak.spotify-java-sdk:api:${VERSION}'
+        compile 'com.github.mgrzeszczak.spotify-java-sdk:model:${VERSION}'
     }
     ```
 
